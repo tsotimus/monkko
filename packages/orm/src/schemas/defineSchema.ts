@@ -26,9 +26,6 @@ export interface SchemaDefinition {
  * @param definition The schema definition object.
  * @returns A processed Monko schema.
  */
-export default function defineSchema(definition: SchemaDefinition) {
-  // Implementation will be handled via Zod for schema validation.
-  // TODO: Generate a Zod schema from the provided SchemaDefinition.
-  throw new Error('defineSchema is not implemented. Use Zod for schema validation.');
-  
+export function defineSchema<const T extends SchemaDefinition>(schema: T): T {
+  return schema;
 }
