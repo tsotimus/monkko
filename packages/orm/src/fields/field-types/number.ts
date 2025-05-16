@@ -1,13 +1,17 @@
 import { BaseField } from "../types";
 
-export interface NumberField extends BaseField {
-    type: 'number';
+export interface NumberFieldProps extends BaseField {
     default?: number;
     min?: number;
     max?: number;
 }
 
-export const createNumberField = (props: NumberField): NumberField => { 
+
+export interface NumberField extends NumberFieldProps {
+    type: "number";
+}
+
+export const createNumberField = (props: NumberFieldProps): NumberField => { 
     return {
         ...props,
         type: 'number',

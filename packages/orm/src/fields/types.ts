@@ -5,10 +5,9 @@ import { ObjectIdField } from "./field-types/objectId";
 import { StringField } from "./field-types/string";
 import type { ObjectId } from "mongodb";
 
-export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'objectId' | 'array' | 'object';
+export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'objectId';
 
 export type BaseField = {
-    type: FieldType;
     required?: boolean;
     optional?: boolean;
     unique?: boolean;

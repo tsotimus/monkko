@@ -1,8 +1,7 @@
 import { BaseField } from "../types";
 
 
-export interface StringField extends BaseField {
-    type: 'string';
+export interface StringFieldProps extends BaseField {
     default?: string;
     minLength?: number;
     maxLength?: number;
@@ -10,7 +9,11 @@ export interface StringField extends BaseField {
     enum?: string[];
 }
 
-export const createStringField = (props: StringField): StringField => {
+export interface StringField extends StringFieldProps {
+    type: "string";
+}
+
+export const createStringField = (props: StringFieldProps): StringField => {
     return {
         ...props,
         type: 'string',

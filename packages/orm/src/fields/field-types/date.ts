@@ -1,11 +1,14 @@
 import { BaseField } from "../types";
 
-export interface DateField extends BaseField {
-    type: 'date';
+export interface DateFieldProps extends BaseField {
     default?: Date;
 }
 
-export const createDateField = (props: DateField): DateField => {
+export interface DateField extends DateFieldProps {
+    type: "date";
+}
+
+export const createDateField = (props: DateFieldProps): DateField => {
     return {
         ...props,
         type: 'date',

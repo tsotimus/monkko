@@ -20,6 +20,9 @@ importers:
 
   apps/next:
     dependencies:
+      '@monko/orm':
+        specifier: workspace:*
+        version: link:../../packages/orm
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -133,12 +136,6 @@ importers:
       mongodb:
         specifier: ^6.16.0
         version: 6.16.0(socks@2.8.4)
-      react:
-        specifier: ^19.1.0
-        version: 19.1.0
-      react-dom:
-        specifier: ^19.1.0
-        version: 19.1.0(react@19.1.0)
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
