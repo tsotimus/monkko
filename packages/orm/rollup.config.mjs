@@ -3,15 +3,16 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 import dts from 'rollup-plugin-dts';
-
+import glob from 'fast-glob';
 const EXTERNAL_DEPS = [
     "zod",
 ]
 
+const entryPoints = glob.sync(`src/**/*.ts`, { absolute: true });
 
 export default [
   {
-    input: 'src/index.ts',
+    input: entryPoints,
     output: {
       dir: 'dist',
       format: 'esm',
@@ -28,7 +29,7 @@ export default [
     ]
   },
   {
-    input: 'src/index.ts',
+    input: entryPoints,
     output: {
       dir: 'dist',
       format: 'esm',
