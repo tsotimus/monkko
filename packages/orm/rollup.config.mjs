@@ -2,7 +2,6 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
-import dts from 'rollup-plugin-dts';
 import glob from 'fast-glob';
 const EXTERNAL_DEPS = [
     "zod",
@@ -24,19 +23,8 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json', declaration: false, declarationMap: false }),
+      typescript({ tsconfig: './tsconfig.json', declaration: true, declarationMap: true }),
       terser()
     ]
   },
-  {
-    input: entryPoints,
-    output: {
-      dir: 'dist',
-      format: 'esm',
-      preserveModules: true,
-      preserveModulesRoot: 'src'
-    },
-    external: [...EXTERNAL_DEPS],
-    plugins: [dts()]
-  }
 ];
