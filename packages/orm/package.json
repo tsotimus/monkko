@@ -9,6 +9,7 @@
     }
   },
   "scripts": {
+    "dev": "rollup -c --watch",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
     "build": "rollup -c"
