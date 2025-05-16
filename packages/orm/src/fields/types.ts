@@ -5,7 +5,7 @@ import { ObjectIdField } from "./field-types/objectId";
 import { StringField } from "./field-types/string";
 import type { ObjectId } from "mongodb";
 
-export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'objectId';
+export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'objectId' | 'object';
 
 export type BaseField = {
     required?: boolean;
@@ -13,8 +13,14 @@ export type BaseField = {
     unique?: boolean;
 }
 
+export interface ObjectFieldProps<T extends Record<string, MonkoField>> extends BaseField {
+    schema: T;
+}
+export interface ObjectField<T extends Record<string, MonkoField>> extends ObjectFieldProps<T> {
+    type: 'object';
+}
 
-export type MonkoField = StringField | NumberField | BooleanField | DateField | ObjectIdField;
+export type MonkoField = StringField | NumberField | BooleanField | DateField | ObjectIdField | ObjectField<any>;
 
 /**
  * Infers the actual TypeScript type (
@@ -27,5 +33,6 @@ export type InferMonkoFieldType<F> =
   F extends BooleanField ? boolean :
   F extends DateField ? Date :
   F extends ObjectIdField ? ObjectId :
+  F extends ObjectField<infer S> ? { [K in keyof S]: InferMonkoFieldType<S[K]> } :
   F extends [infer U] ? InferMonkoFieldType<U>[] :
   never;
