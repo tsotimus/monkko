@@ -1,5 +1,5 @@
 import type { SchemaDefinition } from "../schemas/defineSchema";
-import type { InferMonkoFieldType } from "../fields/type";
+import type { InferMonkoFieldType } from "../fields/types";
 import type { MonkoClient } from "../connections/createConnection";
 import type { Filter, OptionalUnlessRequiredId, UpdateFilter } from "mongodb";
 

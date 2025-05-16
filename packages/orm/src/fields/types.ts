@@ -1,8 +1,8 @@
-import { BooleanField } from "./types/boolean";
-import { DateField } from "./types/date";
-import { NumberField } from "./types/number";
-import { ObjectIdField } from "./types/objectId";
-import { StringField } from "./types/string";
+import { BooleanField } from "./field-types/boolean";
+import { DateField } from "./field-types/date";
+import { NumberField } from "./field-types/number";
+import { ObjectIdField } from "./field-types/objectId";
+import { StringField } from "./field-types/string";
 import type { ObjectId } from "mongodb";
 
 export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'objectId' | 'array' | 'object';

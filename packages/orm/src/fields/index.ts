@@ -1,8 +1,8 @@
-import { createStringField } from "./types/string";
-import { createNumberField } from "./types/number";
-import { createBooleanField } from "./types/boolean";
-import { createObjectIdField } from "./types/objectId";
-import { createDateField } from "./types/date";
+import { createStringField } from "./field-types/string";
+import { createNumberField } from "./field-types/number";
+import { createBooleanField } from "./field-types/boolean";
+import { createObjectIdField } from "./field-types/objectId";
+import { createDateField } from "./field-types/date";
 
 export const fields = {
     string: createStringField,
@@ -11,3 +11,5 @@ export const fields = {
     date: createDateField,
     objectId: createObjectIdField,
 }
+
+export * from './types';

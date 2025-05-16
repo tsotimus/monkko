@@ -2,6 +2,7 @@
   "name": "monko",
   "private": true,
   "scripts": {
+    "p:build": "turbo run build --filter=@monko/orm",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",

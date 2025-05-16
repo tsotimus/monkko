@@ -1,4 +1,4 @@
-import { MonkoField } from "../fields/type";
+import { MonkoField } from "../fields/types";
 
 /**
  * Defines the structure for a Monko schema configuration.

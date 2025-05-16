@@ -1,4 +1,4 @@
-import { BaseField } from "../type";
+import { BaseField } from "../types";
 
 
 export interface BooleanField extends BaseField {
