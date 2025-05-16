@@ -5,6 +5,7 @@ import { terser } from 'rollup-plugin-terser';
 import glob from 'fast-glob';
 const EXTERNAL_DEPS = [
     "zod",
+    "mongodb",
 ]
 
 const entryPoints = glob.sync(`src/**/*.ts`, { absolute: true });

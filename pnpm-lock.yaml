@@ -132,10 +132,6 @@ importers:
         version: 8.31.0(eslint@9.25.0)(typescript@5.8.2)
 
   packages/orm:
-    dependencies:
-      mongodb:
-        specifier: ^6.16.0
-        version: 6.16.0(socks@2.8.4)
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -158,6 +154,9 @@ importers:
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
+      mongodb:
+        specifier: ^6.16.0
+        version: 6.16.0(socks@2.8.4)
       rollup:
         specifier: ^4.40.2
         version: 4.40.2
