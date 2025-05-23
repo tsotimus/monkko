@@ -12,7 +12,7 @@ const EXTERNAL_DEPS = [
 ];
 
 // Get all index.ts files for subpath exports
-const subpathIndexFiles = glob.sync(`src/*/index.ts`, { absolute: true });
+const subpathIndexFiles = glob.sync(`src/*/index.ts`);
 
 // Create entry points for subpath exports (e.g., config/index.ts -> config)
 const subpathEntries = subpathIndexFiles.reduce((acc, file) => {
@@ -23,7 +23,7 @@ const subpathEntries = subpathIndexFiles.reduce((acc, file) => {
 }, {});
 
 // Main entry point
-const mainEntry = { index: path.resolve('src/index.ts') };
+const mainEntry = { index: 'src/index.ts' };
 
 // Combine all entries
 const entries = { ...mainEntry, ...subpathEntries };
@@ -47,8 +47,7 @@ export default [
         tsconfig: './tsconfig.json',
         declaration: false,
         declarationMap: false,
-        sourceMap: true,
-        sourceRoot: '../src'
+        inlineSources: true
       }),
       terser()
     ]
@@ -58,12 +57,14 @@ export default [
     input,
     output: {
       file: `dist/${name}.d.ts`,
-      format: 'esm'
+      format: 'esm',
+      sourcemap: false
     },
     external: [...EXTERNAL_DEPS],
     plugins: [
       dts({
-        respectExternal: true
+        respectExternal: true,
+        tsconfig: './tsconfig.json'
       })
     ]
   }))

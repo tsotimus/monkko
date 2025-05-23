@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "NodeNext",
-    "sourceMap": true,
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
+    "sourceMap": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
