@@ -2,6 +2,19 @@
 
 High-performance developer toolkit for Monko ORM, written in Go for maximum speed.
 
+## Quick Start
+
+```bash
+# Initialize a new Monko project
+@monko/kit init
+
+# Generate types from schemas
+@monko/kit generate
+
+# Validate schemas
+@monko/kit validate
+```
+
 ## Architecture
 
 ```
@@ -17,22 +30,22 @@ packages/
 ## Commands
 
 ```bash
+# Initialize new project with config and .gitignore
+@monko/kit init
+
 # Generate types from schemas
 @monko/kit generate
 
 # Validate schemas
 @monko/kit validate
-
-# Initialize new project
-@monko/kit init
 ```
 
 ## Functionality
 
-- Generate types from schemas, looking at *.monko.ts files
-- Validate schemas
-- Initialize new project
-- Built with Monorepo's in mind, so can be used in any project
+- **Initialize projects** with sensible defaults and .gitignore setup
+- **Generate types** from schemas, looking at *.monko.ts files
+- **Validate schemas** for correctness
+- **Built with Monorepo's in mind**, so can be used in any project
 
 ## Performance Goals
 

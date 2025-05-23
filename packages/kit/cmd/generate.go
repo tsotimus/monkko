@@ -83,17 +83,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 }
 
 func loadConfig() (*Config, error) {
-	// Default config
+	// Default config (minimal defaults since init command creates full config)
 	config := &Config{
-		OutputDir: "generated",
-		Excludes: []string{
-			"**/node_modules/**",
-			"**/dist/**",
-			"**/.next/**",
-			"**/coverage/**",
-			"**/.git/**",
-			"**/build/**",
-		},
+		OutputDir: "generated", // Fallback if no config file
 	}
 
 	// Try to load monko.config.ts if it exists
@@ -141,6 +133,8 @@ func loadConfig() (*Config, error) {
 				}
 			}
 		}
+	} else {
+		fmt.Println("💡 No monko.config.ts found. Run 'monko-kit init' to create one.")
 	}
 
 	return config, nil

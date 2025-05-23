@@ -25,4 +25,5 @@ func main() {
 func init() {
 	// Add commands
 	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(initCmd)
 }

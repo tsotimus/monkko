@@ -2,43 +2,59 @@
 
 Monko Kit supports configuration via a `monko.config.ts` file in your project root.
 
-## Monorepo Usage
+## Getting Started
 
-In a monorepo, you typically run `monko-kit generate` within each package/app directory:
+The easiest way to get started is with the `init` command:
 
 ```bash
-# Using pnpm workspaces
-pnpm -r exec monko-kit generate
+# Creates monko.config.ts with sensible defaults
+# Also updates/creates .gitignore to exclude generated types
+@monko/kit init
+```
 
-# Using turbo
+This creates a `monko.config.ts` file with:
+- `outputDir: "types/monko"`
+- Sensible `excludes` patterns for common build directories
+- Automatic `.gitignore` setup
+
+## Monorepo Usage
+
+In a monorepo, run `@monko/kit init` in each package/app that uses Monko:
+
+```bash
+# Initialize each package individually
+cd apps/api && npx @monko/kit init
+cd apps/web && npx @monko/kit init
+
+# Then generate types as needed
+pnpm -r exec @monko/kit generate
+# or with turbo
 turbo run generate
-
-# Or manually in each package
-cd apps/api && pnpm exec monko-kit generate
-cd apps/web && pnpm exec monko-kit generate
 ```
 
 ## Configuration Options
 
 ```typescript
-// monko.config.ts
+// monko.config.ts (created by init command)
 import { defineConfig } from "@monko/orm";
 
 export default defineConfig({
-  outputDir: "src/generated",
-  includes: [
-    "src/schemas",
-    "lib/models"
-  ],
+  outputDir: "types/monko",
   excludes: [
-    "**/test/**",
-    "**/*.test.ts"
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/coverage/**",
+    "**/.git/**",
+    "**/build/**"
   ]
 });
 ```
 
 ### `outputDir` (required)
 Directory where generated TypeScript types will be written.
+- **Default**: `"types/monko"` (via init command)
+- **Fallback**: `"generated"` (if no config file)
 
 ### `includes` (optional)
 Array of specific directories to search for `.monko.ts` files. If not specified, searches the entire current directory.
@@ -49,26 +65,22 @@ Array of specific directories to search for `.monko.ts` files. If not specified,
 - Better for large codebases
 
 ### `excludes` (optional)
-Array of glob patterns to exclude from search. If not specified, uses sensible defaults:
-- `**/node_modules/**`
-- `**/dist/**`
-- `**/.next/**`
-- `**/coverage/**`
-- `**/.git/**`
-- `**/build/**`
+Array of glob patterns to exclude from search. 
+- **Default**: Common build/dependency directories (via init command)
+- **Fallback**: No excludes (if no config file)
 
-**Custom excludes completely override defaults**, so include common patterns if needed.
+## Manual Configuration Examples
 
-## Examples
+If you prefer to create the config manually or customize beyond the defaults:
 
 ### Minimal Config
 ```typescript
 export default defineConfig({
-  outputDir: "generated"
+  outputDir: "src/types"
 });
 ```
 
-### Next.js App
+### Next.js App (Custom)
 ```typescript
 export default defineConfig({
   outputDir: "src/types/generated",
@@ -81,13 +93,27 @@ export default defineConfig({
 });
 ```
 
-### API Package
+### API Package (Custom)
 ```typescript
 export default defineConfig({
   outputDir: "src/generated",
   includes: [
     "src/schemas",
     "src/models"
-  ]
+  ],
+  // Uses init command defaults for excludes
 });
+```
+
+## .gitignore Integration
+
+The `init` command automatically:
+- Creates `.gitignore` if it doesn't exist
+- Adds your `outputDir` to `.gitignore`
+- Skips if the directory is already ignored
+
+Example `.gitignore` addition:
+```
+# Monko generated types
+types/monko
 ``` 
