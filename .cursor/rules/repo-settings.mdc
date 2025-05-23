@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Use pnpm for all commands
+We are in a turborepo monorepo via pnpm workspaces
