@@ -181,20 +181,39 @@ func findSchemaFiles(config *Config) ([]string, error) {
 }
 
 func extractSchemas(files []string) ([]Schema, error) {
-	// For now, return mock data - we'll implement Node.js extraction later
-	mockSchema := Schema{
-		Name:       "User",
-		DB:         "myapp",
-		Collection: "users",
-		Fields: map[string]Field{
-			"name":  {Type: "string", Required: true},
-			"email": {Type: "string", Required: true, Unique: true},
-			"age":   {Type: "number", Required: false},
-		},
-		Options: Options{Timestamps: true},
+	if len(files) == 0 {
+		return []Schema{}, nil
 	}
 
-	return []Schema{mockSchema}, nil
+	// Prepare the command to call Node.js extractor
+	args := append([]string{"scripts/extract-schemas.js"}, files...)
+	cmd := exec.Command("node", args...)
+
+	// Run the command and capture output
+	output, err := cmd.Output()
+	if err != nil {
+		// Check if it's an ExitError to get stderr
+		if exitError, ok := err.(*exec.ExitError); ok {
+			return nil, fmt.Errorf("schema extraction failed: %s\nStderr: %s", err, string(exitError.Stderr))
+		}
+		return nil, fmt.Errorf("failed to run schema extractor: %w", err)
+	}
+
+	// Parse the JSON output
+	var result struct {
+		Schemas     []Schema `json:"schemas"`
+		ExtractedAt string   `json:"extractedAt"`
+		Files       []string `json:"files"`
+	}
+
+	err = json.Unmarshal(output, &result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse extracted schemas: %w\nOutput: %s", err, string(output))
+	}
+
+	fmt.Printf("📋 Extracted %d schema(s) from %d file(s)\n", len(result.Schemas), len(result.Files))
+
+	return result.Schemas, nil
 }
 
 func generateTypes(schemas []Schema, outputDir string) error {

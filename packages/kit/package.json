@@ -7,6 +7,7 @@
   },
   "files": [
     "bin/",
+    "scripts/",
     "README.md"
   ],
   "scripts": {
@@ -18,9 +19,13 @@
     "build:windows": "GOOS=windows GOARCH=amd64 go build -o bin/monko-windows.exe ./cmd/",
     "build:current": "node scripts/build-current.js",
     "test": "go test ./...",
+    "test:extractor": "node scripts/extract-schemas.js test/example.monko.ts",
+    "test:extractor:help": "node scripts/extract-schemas.js --help",
+    "test:generate": "./bin/monko generate",
+    "dev:extract": "node scripts/extract-schemas.js",
     "postinstall": "npm run deps && npm run build:current && node scripts/postinstall.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "typescript": "^5.0.0"
   },
   "engines": {
