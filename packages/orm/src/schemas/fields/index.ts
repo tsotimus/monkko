@@ -4,6 +4,8 @@ import { createBooleanField } from "./field-types/boolean";
 import { createObjectIdField } from "./field-types/objectId";
 import { createDateField } from "./field-types/date";
 import { createObjectField } from "./field-types/object";
+
+
 export const fields = {
     string: createStringField,
     number: createNumberField,
@@ -12,5 +14,3 @@ export const fields = {
     objectId: createObjectIdField,
     object: createObjectField,
 }
-
-export * from './types';

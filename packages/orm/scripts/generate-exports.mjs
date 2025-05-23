@@ -14,7 +14,7 @@ const subpathIndexFiles = glob.sync(`${srcPath}/*/index.ts`);
 // Generate exports object
 const exports = {
   ".": {
-    "import": "./dist/index.js",
+    "import": "./dist/index/index.js",
     "types": "./dist/index.d.ts"
   }
 };
@@ -25,8 +25,8 @@ subpathIndexFiles.forEach(file => {
   const dirName = path.dirname(relativePath);
   
   exports[`./${dirName}`] = {
-    "import": `./dist/${dirName}.js`,
-    "types": `./dist/${dirName}.d.ts`
+    "import": `./dist/${dirName}/index.js`,
+    "types": `./dist/${dirName}/index.d.ts`
   };
 });
 

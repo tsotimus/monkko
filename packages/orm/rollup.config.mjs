@@ -2,7 +2,6 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
-import dts from 'rollup-plugin-dts';
 import glob from 'fast-glob';
 import path from 'path';
 
@@ -29,14 +28,14 @@ const mainEntry = { index: 'src/index.ts' };
 const entries = { ...mainEntry, ...subpathEntries };
 
 export default [
-  // Phase 1: JavaScript build with source maps
+  // Single build phase with both JS and declarations
   {
     input: entries,
     output: {
       dir: 'dist',
       format: 'esm',
       sourcemap: true,
-      entryFileNames: '[name].js',
+      entryFileNames: '[name]/index.js',
       chunkFileNames: 'chunks/[name]-[hash].js'
     },
     external: [...EXTERNAL_DEPS],
@@ -45,27 +44,11 @@ export default [
       commonjs(),
       typescript({ 
         tsconfig: './tsconfig.json',
-        declaration: false,
-        declarationMap: false,
+        declaration: true,
+        declarationMap: true,
         inlineSources: true
       }),
       terser()
     ]
-  },
-  // Phase 2: TypeScript declarations using rollup-plugin-dts
-  ...Object.entries(entries).map(([name, input]) => ({
-    input,
-    output: {
-      file: `dist/${name}.d.ts`,
-      format: 'esm',
-      sourcemap: false
-    },
-    external: [...EXTERNAL_DEPS],
-    plugins: [
-      dts({
-        respectExternal: true,
-        tsconfig: './tsconfig.json'
-      })
-    ]
-  }))
+  }
 ];

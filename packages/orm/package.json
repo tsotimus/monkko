@@ -4,24 +4,24 @@
   "private": true,
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index/index.js",
       "types": "./dist/index.d.ts"
     },
     "./config": {
-      "import": "./dist/config.js",
-      "types": "./dist/config.d.ts"
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
     },
     "./connections": {
-      "import": "./dist/connections.js",
-      "types": "./dist/connections.d.ts"
+      "import": "./dist/connections/index.js",
+      "types": "./dist/connections/index.d.ts"
     },
     "./models": {
-      "import": "./dist/models.js",
-      "types": "./dist/models.d.ts"
+      "import": "./dist/models/index.js",
+      "types": "./dist/models/index.d.ts"
     },
     "./schemas": {
-      "import": "./dist/schemas.js",
-      "types": "./dist/schemas.d.ts"
+      "import": "./dist/schemas/index.js",
+      "types": "./dist/schemas/index.d.ts"
     }
   },
   "scripts": {
