@@ -26,6 +26,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      mongodb:
+        specifier: ^6.16.0
+        version: 6.16.0(socks@2.8.4)
       next:
         specifier: ^15.3.0
         version: 15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -36,6 +39,9 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
     devDependencies:
+      '@monko/kit':
+        specifier: workspace:*
+        version: link:../../packages/kit
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -130,6 +136,12 @@ importers:
       typescript-eslint:
         specifier: ^8.31.0
         version: 8.31.0(eslint@9.25.0)(typescript@5.8.2)
+
+  packages/kit:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.2
 
   packages/orm:
     devDependencies:

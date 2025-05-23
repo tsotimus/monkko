@@ -1,0 +1,31 @@
+{
+  "name": "@monko/kit",
+  "version": "0.1.0",
+  "description": "High-performance developer toolkit for Monko ORM",
+  "bin": {
+    "monko-kit": "./bin/monko-kit"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "scripts": {
+    "deps": "go mod download",
+    "build": "go build -o bin/monko-kit ./cmd/",
+    "build:all": "npm run build:linux && npm run build:macos && npm run build:windows",
+    "build:linux": "GOOS=linux GOARCH=amd64 go build -o bin/monko-kit-linux ./cmd/",
+    "build:macos": "GOOS=darwin GOARCH=amd64 go build -o bin/monko-kit-darwin ./cmd/",
+    "build:windows": "GOOS=windows GOARCH=amd64 go build -o bin/monko-kit-windows.exe ./cmd/",
+    "build:current": "node scripts/build-current.js",
+    "test": "go test ./...",
+    "postinstall": "npm run deps && npm run build:current && node scripts/postinstall.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"]
+} 

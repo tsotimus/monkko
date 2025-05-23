@@ -18,5 +18,8 @@ export const User = defineSchema({
     name: fields.string({ required: true }),
     email: fields.string({ required: true, unique: true }),
     address: Address({optional: true})
+  },
+  options: {
+    timestamps: true
   }
 });
