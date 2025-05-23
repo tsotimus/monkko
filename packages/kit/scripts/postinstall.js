@@ -21,12 +21,12 @@ function getPlatformBinary() {
   }
   
   const extension = platform === 'win32' ? '.exe' : '';
-  return `monko-kit-${platformName}${extension}`;
+  return `monko-${platformName}${extension}`;
 }
 
 function setupBinary() {
   const binDir = path.join(__dirname, '..', 'bin');
-  const targetBinary = path.join(binDir, 'monko-kit');
+  const targetBinary = path.join(binDir, 'monko');
   const platformBinary = path.join(binDir, getPlatformBinary());
   
   // Check if platform-specific binary exists
@@ -49,7 +49,7 @@ function setupBinary() {
     fs.chmodSync(targetBinary, '755');
   }
   
-  console.log(`✅ monko-kit ready for ${os.platform()}-${os.arch()}`);
+  console.log(`✅ monko ready for ${os.platform()}-${os.arch()}`);
 }
 
 // Only run if this script is executed directly (not required)

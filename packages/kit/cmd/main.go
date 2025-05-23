@@ -8,7 +8,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "monko-kit",
+	Use:   "monko",
 	Short: "High-performance developer toolkit for Monko ORM",
 	Long: `Monko Kit is a fast CLI tool for generating TypeScript types from Monko ORM schemas.
 	

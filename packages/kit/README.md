@@ -6,13 +6,13 @@ High-performance developer toolkit for Monko ORM, written in Go for maximum spee
 
 ```bash
 # Initialize a new Monko project
-@monko/kit init
+monko init
 
 # Generate types from schemas
-@monko/kit generate
+monko generate
 
 # Validate schemas
-@monko/kit validate
+monko validate
 ```
 
 ## Architecture
@@ -31,13 +31,13 @@ packages/
 
 ```bash
 # Initialize new project with config and .gitignore
-@monko/kit init
+monko init
 
 # Generate types from schemas
-@monko/kit generate
+monko generate
 
 # Validate schemas
-@monko/kit validate
+monko validate
 ```
 
 ## Functionality
