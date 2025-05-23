@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "High-performance developer toolkit for Monko ORM",
   "bin": {
-    "monko-kit": "./bin/monko-kit"
+    "@monko/kit": "./bin/monko-kit"
   },
   "files": [
     "bin/",
