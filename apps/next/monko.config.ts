@@ -1,4 +1,4 @@
-import { defineConfig } from "@monko/orm/config/defineConfig";
+import { defineConfig } from "@monko/orm/config";
 
 export default defineConfig({
   outputDir: "types/monko",

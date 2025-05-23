@@ -3,16 +3,37 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "types": "./dist/config.d.ts"
+    },
+    "./connections": {
+      "import": "./dist/connections.js",
+      "types": "./dist/connections.d.ts"
+    },
+    "./fields": {
+      "import": "./dist/fields.js",
+      "types": "./dist/fields.d.ts"
+    },
+    "./models": {
+      "import": "./dist/models.js",
+      "types": "./dist/models.d.ts"
+    },
+    "./schemas": {
+      "import": "./dist/schemas.js",
+      "types": "./dist/schemas.d.ts"
     }
   },
   "scripts": {
-    "dev": "rollup -c --watch",
+    "dev": "npm run generate-exports && rollup -c --watch",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "build": "rollup -c"
+    "build": "npm run generate-exports && rollup -c",
+    "generate-exports": "node scripts/generate-exports.mjs"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
