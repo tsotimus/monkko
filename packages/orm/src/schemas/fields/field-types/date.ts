@@ -1,4 +1,4 @@
-import { BaseField } from "../types";
+import { BaseField } from "../../types";
 
 export interface DateFieldProps extends BaseField {
     default?: Date;

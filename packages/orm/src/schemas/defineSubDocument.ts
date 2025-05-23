@@ -1,5 +1,5 @@
 import { createObjectField } from './fields/field-types/object';
-import type { BaseField, MonkoField, ObjectField } from './fields/types';
+import type { BaseField, MonkoField, ObjectField } from './types';
 
 /**
  * Defines an embedded sub-document schema for reuse in other schemas.

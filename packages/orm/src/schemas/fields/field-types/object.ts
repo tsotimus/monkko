@@ -1,4 +1,4 @@
-import { BaseField, ObjectField, MonkoField } from '../types';
+import { BaseField, ObjectField, MonkoField } from '../../types';
 
 export function createObjectField<T extends Record<string, MonkoField>>(
   schema: T,
