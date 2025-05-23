@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -36,11 +38,23 @@ type Options struct {
 	Timestamps bool `json:"timestamps"`
 }
 
+type Config struct {
+	OutputDir string   `json:"outputDir"`
+	Includes  []string `json:"includes,omitempty"`
+	Excludes  []string `json:"excludes,omitempty"`
+}
+
 func runGenerate(cmd *cobra.Command, args []string) error {
 	fmt.Println("🚀 Generating TypeScript types from Monko schemas...")
 
-	// Step 1: Find all .monko.ts files
-	schemaFiles, err := findSchemaFiles()
+	// Step 1: Load config
+	config, err := loadConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	// Step 2: Find all .monko.ts files
+	schemaFiles, err := findSchemaFiles(config)
 	if err != nil {
 		return fmt.Errorf("failed to find schema files: %w", err)
 	}
@@ -52,14 +66,14 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("📄 Found %d schema file(s)\n", len(schemaFiles))
 
-	// Step 2: Extract schemas using Node.js
+	// Step 3: Extract schemas using Node.js
 	schemas, err := extractSchemas(schemaFiles)
 	if err != nil {
 		return fmt.Errorf("failed to extract schemas: %w", err)
 	}
 
-	// Step 3: Generate TypeScript types
-	err = generateTypes(schemas)
+	// Step 4: Generate TypeScript types
+	err = generateTypes(schemas, config.OutputDir)
 	if err != nil {
 		return fmt.Errorf("failed to generate types: %w", err)
 	}
@@ -68,22 +82,108 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func findSchemaFiles() ([]string, error) {
+func loadConfig() (*Config, error) {
+	// Default config
+	config := &Config{
+		OutputDir: "generated",
+		Excludes: []string{
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/.next/**",
+			"**/coverage/**",
+			"**/.git/**",
+			"**/build/**",
+		},
+	}
+
+	// Try to load monko.config.ts if it exists
+	if _, err := os.Stat("monko.config.ts"); err == nil {
+		fmt.Println("📝 Loading monko.config.ts...")
+
+		// Use Node.js to extract config (similar to schema extraction)
+		cmd := exec.Command("node", "-e", `
+			const { pathToFileURL } = require('url');
+			const path = require('path');
+			const configPath = path.resolve('monko.config.ts');
+			
+			// Simple extraction - in reality we'd use proper TS parsing
+			const fs = require('fs');
+			const content = fs.readFileSync('monko.config.ts', 'utf8');
+			
+			// Basic regex extraction for now (should be replaced with proper TS parsing)
+			const match = content.match(/defineConfig\s*\(\s*({[\s\S]*?})\s*\)/);
+			if (match) {
+				try {
+					// Convert to valid JSON (handle quotes, etc.)
+					let configStr = match[1]
+						.replace(/(\w+):/g, '"$1":')  // Quote keys
+						.replace(/'/g, '"');          // Single to double quotes
+					console.log(configStr);
+				} catch (e) {
+					console.error('Failed to parse config');
+				}
+			}
+		`)
+
+		output, err := cmd.Output()
+		if err == nil && len(output) > 0 {
+			var userConfig Config
+			if json.Unmarshal(output, &userConfig) == nil {
+				// Merge user config with defaults
+				if userConfig.OutputDir != "" {
+					config.OutputDir = userConfig.OutputDir
+				}
+				if userConfig.Includes != nil {
+					config.Includes = userConfig.Includes
+				}
+				if userConfig.Excludes != nil {
+					config.Excludes = userConfig.Excludes
+				}
+			}
+		}
+	}
+
+	return config, nil
+}
+
+func findSchemaFiles(config *Config) ([]string, error) {
 	var files []string
 
-	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+	// Determine search paths
+	searchPaths := config.Includes
+	if len(searchPaths) == 0 {
+		searchPaths = []string{"."} // Default to current directory
+	}
+
+	for _, searchPath := range searchPaths {
+		err := filepath.Walk(searchPath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			// Check excludes
+			for _, exclude := range config.Excludes {
+				if matched, _ := filepath.Match(exclude, path); matched {
+					if info.IsDir() {
+						return filepath.SkipDir
+					}
+					return nil
+				}
+			}
+
+			if strings.HasSuffix(path, ".monko.ts") {
+				files = append(files, path)
+			}
+
+			return nil
+		})
+
 		if err != nil {
-			return err
+			return nil, err
 		}
+	}
 
-		if strings.HasSuffix(path, ".monko.ts") {
-			files = append(files, path)
-		}
-
-		return nil
-	})
-
-	return files, err
+	return files, nil
 }
 
 func extractSchemas(files []string) ([]Schema, error) {
@@ -103,9 +203,9 @@ func extractSchemas(files []string) ([]Schema, error) {
 	return []Schema{mockSchema}, nil
 }
 
-func generateTypes(schemas []Schema) error {
-	// Create generated directory if it doesn't exist
-	err := os.MkdirAll("generated", 0755)
+func generateTypes(schemas []Schema, outputDir string) error {
+	// Create output directory if it doesn't exist
+	err := os.MkdirAll(outputDir, 0755)
 	if err != nil {
 		return err
 	}
@@ -117,7 +217,7 @@ func generateTypes(schemas []Schema) error {
 			return fmt.Errorf("failed to generate content for %s: %w", schema.Name, err)
 		}
 
-		filename := fmt.Sprintf("generated/%s.types.ts", schema.Name)
+		filename := fmt.Sprintf("%s/%s.types.ts", outputDir, schema.Name)
 		err = os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			return fmt.Errorf("failed to write file %s: %w", filename, err)
