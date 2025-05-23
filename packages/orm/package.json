@@ -15,10 +15,6 @@
       "import": "./dist/connections.js",
       "types": "./dist/connections.d.ts"
     },
-    "./fields": {
-      "import": "./dist/fields.js",
-      "types": "./dist/fields.d.ts"
-    },
     "./models": {
       "import": "./dist/models.js",
       "types": "./dist/models.d.ts"

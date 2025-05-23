@@ -1,4 +1,4 @@
-export * from './fields';
+export * from './schemas/fields';
 export * from './models';
 export * from './schemas';
 export * from './connections';

@@ -5,6 +5,13 @@ import { ObjectIdField } from "./field-types/objectId";
 import { StringField } from "./field-types/string";
 import type { ObjectId } from "mongodb";
 
+// Re-export individual field types and their props
+export type { BooleanField } from "./field-types/boolean";
+export type { DateField, DateFieldProps } from "./field-types/date";
+export type { NumberField, NumberFieldProps } from "./field-types/number";
+export type { ObjectIdField, ObjectIdFieldProps } from "./field-types/objectId";
+export type { StringField, StringFieldProps } from "./field-types/string";
+
 export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'objectId' | 'object';
 
 export type BaseField = {

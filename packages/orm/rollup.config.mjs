@@ -29,7 +29,7 @@ const mainEntry = { index: path.resolve('src/index.ts') };
 const entries = { ...mainEntry, ...subpathEntries };
 
 export default [
-  // JavaScript build
+  // Phase 1: JavaScript build with source maps
   {
     input: entries,
     output: {
@@ -46,19 +46,19 @@ export default [
       typescript({ 
         tsconfig: './tsconfig.json',
         declaration: false,
-        declarationMap: false
+        declarationMap: false,
+        sourceMap: true,
+        sourceRoot: '../src'
       }),
       terser()
     ]
   },
-  // Type declarations build
-  {
-    input: entries,
+  // Phase 2: TypeScript declarations using rollup-plugin-dts
+  ...Object.entries(entries).map(([name, input]) => ({
+    input,
     output: {
-      dir: 'dist',
-      format: 'esm',
-      entryFileNames: '[name].d.ts',
-      chunkFileNames: '[name].d.ts'
+      file: `dist/${name}.d.ts`,
+      format: 'esm'
     },
     external: [...EXTERNAL_DEPS],
     plugins: [
@@ -66,5 +66,5 @@ export default [
         respectExternal: true
       })
     ]
-  }
+  }))
 ];
