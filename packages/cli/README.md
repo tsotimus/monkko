@@ -1,4 +1,4 @@
-# @monko/kit
+# @monko/cli
 
 High-performance developer toolkit for Monko ORM, written in Go for maximum speed.
 
@@ -20,7 +20,7 @@ monko validate
 ```
 packages/
 ├── orm/                    # TypeScript ORM package
-├── kit/                    # Go CLI package
+├── cli/                    # Go CLI package
 │   ├── cmd/               # CLI commands
 │   ├── parser/            # Schema parsing logic
 │   ├── generator/         # TypeScript generation

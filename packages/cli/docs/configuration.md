@@ -1,6 +1,6 @@
 # Configuration
 
-Monko Kit supports configuration via a `monko.config.ts` file in your project root.
+Monko CLI supports configuration via a `monko.config.ts` file in your project root.
 
 ## Getting Started
 
@@ -9,7 +9,7 @@ The easiest way to get started is with the `init` command:
 ```bash
 # Creates monko.config.ts with sensible defaults
 # Also updates/creates .gitignore to exclude generated types
-@monko/kit init
+@monko/cli init
 ```
 
 This creates a `monko.config.ts` file with:
@@ -19,15 +19,15 @@ This creates a `monko.config.ts` file with:
 
 ## Monorepo Usage
 
-In a monorepo, run `@monko/kit init` in each package/app that uses Monko:
+In a monorepo, run `@monko/cli init` in each package/app that uses Monko:
 
 ```bash
 # Initialize each package individually
-cd apps/api && npx @monko/kit init
-cd apps/web && npx @monko/kit init
+cd apps/api && npx @monko/cli init
+cd apps/web && npx @monko/cli init
 
 # Then generate types as needed
-pnpm -r exec @monko/kit generate
+pnpm -r exec @monko/cli generate
 # or with turbo
 turbo run generate
 ```

@@ -39,9 +39,9 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
     devDependencies:
-      '@monko/kit':
+      '@monko/cli':
         specifier: workspace:*
-        version: link:../../packages/kit
+        version: link:../../packages/cli
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -101,6 +101,12 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
+  packages/cli:
+    dependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.2
+
   packages/eslint-config:
     devDependencies:
       '@eslint/js':
@@ -136,12 +142,6 @@ importers:
       typescript-eslint:
         specifier: ^8.31.0
         version: 8.31.0(eslint@9.25.0)(typescript@5.8.2)
-
-  packages/kit:
-    dependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.2
 
   packages/orm:
     devDependencies:

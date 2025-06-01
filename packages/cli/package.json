@@ -1,7 +1,7 @@
 {
-  "name": "@monko/kit",
+  "name": "@monko/cli",
   "version": "0.1.0",
-  "description": "High-performance developer toolkit for Monko ORM",
+  "description": "High-performance developer CLI for Monko ORM",
   "bin": {
     "monko": "./bin/monko"
   },
