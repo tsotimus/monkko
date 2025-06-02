@@ -83,58 +83,37 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 }
 
 func loadConfig() (*Config, error) {
-	// Default config (minimal defaults since init command creates full config)
+	// Default config (fallback if no config file)
 	config := &Config{
 		OutputDir: "generated", // Fallback if no config file
 	}
 
-	// Try to load monko.config.ts if it exists
-	if _, err := os.Stat("monko.config.ts"); err == nil {
-		fmt.Println("📝 Loading monko.config.ts...")
+	// Try to load monko.config.json
+	if _, err := os.Stat("monko.config.json"); err == nil {
+		fmt.Println("📝 Loading monko.config.json...")
 
-		// Use Node.js to extract config (similar to schema extraction)
-		cmd := exec.Command("node", "-e", `
-			const { pathToFileURL } = require('url');
-			const path = require('path');
-			const configPath = path.resolve('monko.config.ts');
-			
-			// Simple extraction - in reality we'd use proper TS parsing
-			const fs = require('fs');
-			const content = fs.readFileSync('monko.config.ts', 'utf8');
-			
-			// Basic regex extraction for now (should be replaced with proper TS parsing)
-			const match = content.match(/defineConfig\s*\(\s*({[\s\S]*?})\s*\)/);
-			if (match) {
-				try {
-					// Convert to valid JSON (handle quotes, etc.)
-					let configStr = match[1]
-						.replace(/(\w+):/g, '"$1":')  // Quote keys
-						.replace(/'/g, '"');          // Single to double quotes
-					console.log(configStr);
-				} catch (e) {
-					console.error('Failed to parse config');
-				}
-			}
-		`)
+		data, err := os.ReadFile("monko.config.json")
+		if err != nil {
+			return nil, fmt.Errorf("failed to read monko.config.json: %w", err)
+		}
 
-		output, err := cmd.Output()
-		if err == nil && len(output) > 0 {
-			var userConfig Config
-			if json.Unmarshal(output, &userConfig) == nil {
-				// Merge user config with defaults
-				if userConfig.OutputDir != "" {
-					config.OutputDir = userConfig.OutputDir
-				}
-				if userConfig.Includes != nil {
-					config.Includes = userConfig.Includes
-				}
-				if userConfig.Excludes != nil {
-					config.Excludes = userConfig.Excludes
-				}
-			}
+		var userConfig Config
+		if err := json.Unmarshal(data, &userConfig); err != nil {
+			return nil, fmt.Errorf("failed to parse monko.config.json: %w", err)
+		}
+
+		// Merge user config with defaults
+		if userConfig.OutputDir != "" {
+			config.OutputDir = userConfig.OutputDir
+		}
+		if userConfig.Includes != nil {
+			config.Includes = userConfig.Includes
+		}
+		if userConfig.Excludes != nil {
+			config.Excludes = userConfig.Excludes
 		}
 	} else {
-		fmt.Println("💡 No monko.config.ts found. Run 'monko-kit init' to create one.")
+		fmt.Println("💡 No monko.config.json found. Run '@monko/cli init' to create one.")
 	}
 
 	return config, nil

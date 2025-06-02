@@ -1,18 +1,18 @@
 # Configuration
 
-Monko CLI supports configuration via a `monko.config.ts` file in your project root.
+Monko CLI supports configuration via a `monko.config.json` file in your project root.
 
 ## Getting Started
 
 The easiest way to get started is with the `init` command:
 
 ```bash
-# Creates monko.config.ts with sensible defaults
+# Creates monko.config.json with sensible defaults
 # Also updates/creates .gitignore to exclude generated types
 @monko/cli init
 ```
 
-This creates a `monko.config.ts` file with:
+This creates a `monko.config.json` file with:
 - `outputDir: "types/monko"`
 - Sensible `excludes` patterns for common build directories
 - Automatic `.gitignore` setup
@@ -34,13 +34,10 @@ turbo run generate
 
 ## Configuration Options
 
-```typescript
-// monko.config.ts (created by init command)
-import { defineConfig } from "@monko/orm";
-
-export default defineConfig({
-  outputDir: "types/monko",
-  excludes: [
+```json
+{
+  "outputDir": "types/monko",
+  "excludes": [
     "**/node_modules/**",
     "**/dist/**",
     "**/.next/**",
@@ -48,7 +45,7 @@ export default defineConfig({
     "**/.git/**",
     "**/build/**"
   ]
-});
+}
 ```
 
 ### `outputDir` (required)
@@ -74,35 +71,34 @@ Array of glob patterns to exclude from search.
 If you prefer to create the config manually or customize beyond the defaults:
 
 ### Minimal Config
-```typescript
-export default defineConfig({
-  outputDir: "src/types"
-});
+```json
+{
+  "outputDir": "src/types"
+}
 ```
 
 ### Next.js App (Custom)
-```typescript
-export default defineConfig({
-  outputDir: "src/types/generated",
-  includes: ["schemas"],
-  excludes: [
+```json
+{
+  "outputDir": "src/types/generated",
+  "includes": ["schemas"],
+  "excludes": [
     "**/node_modules/**",
     "**/.next/**",
     "**/test/**"
   ]
-});
+}
 ```
 
 ### API Package (Custom)
-```typescript
-export default defineConfig({
-  outputDir: "src/generated",
-  includes: [
+```json
+{
+  "outputDir": "src/generated",
+  "includes": [
     "src/schemas",
     "src/models"
-  ],
-  // Uses init command defaults for excludes
-});
+  ]
+}
 ```
 
 ## .gitignore Integration
