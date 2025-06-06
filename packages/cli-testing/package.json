@@ -1,13 +1,15 @@
 {
   "name": "@monko/cli-testing",
   "version": "0.1.0",
-  "description": "Testing utilities and validation framework for Monko CLI code generation",
-  "main": "index.js",
+  "description": "Testing utilities for validating Monko CLI code generation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "go build -o bin/cli-testing ./cmd/...",
-    "test": "go test ./...",
-    "dev": "go run ./cmd/main.go"
+    "build": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "monko",
@@ -19,19 +21,25 @@
   ],
   "author": "Monko Team",
   "license": "MIT",
+  "dependencies": {
+    "diff": "^5.1.0",
+    "glob": "^10.3.0"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "@types/diff": "^5.0.0",
+    "tsx": "^4.0.0",
+    "vitest": "^1.0.0",
+    "@repo/typescript-config": "workspace:*"
   },
   "peerDependencies": {
     "@monko/cli": "workspace:*"
   },
   "files": [
-    "bin/",
-    "pkg/",
-    "*.go",
-    "go.mod",
-    "go.sum"
+    "dist/",
+    "README.md",
+    "package.json"
   ],
   "repository": {
     "type": "git",
