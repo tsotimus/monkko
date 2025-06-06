@@ -1,0 +1,13 @@
+{
+  "cases": [
+    {
+      "name": "example_schema",
+      "schemaFile": "test/example.monko.ts",
+      "expectedTypeFiles": [
+        "generated/User.types.ts",
+        "generated/Post.types.ts"
+      ],
+      "description": "Test generation from example.monko.ts containing User and Post schemas with timestamps"
+    }
+  ]
+} 

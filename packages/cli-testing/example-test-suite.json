@@ -1,0 +1,59 @@
+{
+  "cases": [
+    {
+      "name": "example_schema",
+      "schemaFile": "test/example.monko.ts",
+      "expectedTypeFiles": [
+        "generated/User.types.ts",
+        "generated/Post.types.ts"
+      ],
+      "description": "Test generation from example.monko.ts containing User and Post schemas with timestamps",
+      "validationRules": {
+        "User": {
+          "fields": {
+            "name": { "type": "string", "required": true },
+            "email": { "type": "string", "required": true },
+            "age": { "type": "number", "required": false },
+            "isActive": { "type": "boolean", "required": true }
+          },
+          "hasTimestamps": true,
+          "expectedTypes": ["UserDocument", "CreateUserInput", "UpdateUserInput"],
+          "requiredImports": ["import type { ObjectId } from 'mongodb';"]
+        },
+        "Post": {
+          "fields": {
+            "title": { "type": "string", "required": true },
+            "content": { "type": "string", "required": true },
+            "authorId": { "type": "objectId", "required": true },
+            "publishedAt": { "type": "date", "required": false },
+            "tags": { "type": "any", "required": false }
+          },
+          "hasTimestamps": true,
+          "expectedTypes": ["PostDocument", "CreatePostInput", "UpdatePostInput"],
+          "requiredImports": ["import type { ObjectId } from 'mongodb';"]
+        }
+      }
+    },
+    {
+      "name": "simple_schema",
+      "schemaFile": "test/simple.monko.ts",
+      "expectedTypeFiles": [
+        "generated/Product.types.ts"
+      ],
+      "description": "Test generation from simple.monko.ts containing Product schema without timestamps",
+      "validationRules": {
+        "Product": {
+          "fields": {
+            "name": { "type": "string", "required": true },
+            "price": { "type": "number", "required": true },
+            "description": { "type": "string", "required": false },
+            "inStock": { "type": "boolean", "required": true }
+          },
+          "hasTimestamps": false,
+          "expectedTypes": ["ProductDocument", "CreateProductInput", "UpdateProductInput"],
+          "requiredImports": ["import type { ObjectId } from 'mongodb';"]
+        }
+      }
+    }
+  ]
+} 

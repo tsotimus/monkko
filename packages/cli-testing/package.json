@@ -1,0 +1,41 @@
+{
+  "name": "@monko/cli-testing",
+  "version": "0.1.0",
+  "description": "Testing utilities and validation framework for Monko CLI code generation",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "go build -o bin/cli-testing ./cmd/...",
+    "test": "go test ./...",
+    "dev": "go run ./cmd/main.go"
+  },
+  "keywords": [
+    "monko",
+    "cli",
+    "testing",
+    "code-generation",
+    "typescript",
+    "validation"
+  ],
+  "author": "Monko Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "@monko/cli": "workspace:*"
+  },
+  "files": [
+    "bin/",
+    "pkg/",
+    "*.go",
+    "go.mod",
+    "go.sum"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monko/kit.git",
+    "directory": "packages/cli-testing"
+  }
+}
