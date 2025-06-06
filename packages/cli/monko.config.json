@@ -1,0 +1,15 @@
+{
+    "outputDir": "test/types/monko",
+    "excludes": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/build/**"
+    ],
+    "includes": [
+      "test/schemas/**"
+    ]
+  }
+  
