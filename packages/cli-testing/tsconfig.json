@@ -5,9 +5,13 @@
     "outDir": "./dist",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "rootDir": "./src",
-    "types": ["node"]
+    "rootDir": ".",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test"]
+  "exclude": ["node_modules", "dist", "data"]
 }
