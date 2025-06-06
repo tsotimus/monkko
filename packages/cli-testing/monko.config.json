@@ -1,5 +1,5 @@
 {
-    "outputDir": "test/types/monko",
+    "outputDir": "generated",
     "excludes": [
       "**/node_modules/**",
       "**/dist/**",
@@ -9,7 +9,7 @@
       "**/build/**"
     ],
     "includes": [
-      "test/schemas/**"
+      "src/schemas/**"
     ]
   }
   

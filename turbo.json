@@ -13,6 +13,7 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
+    "generate": {},
     "test": {},
     "test:watch": {
       "cache": false,
