@@ -118,6 +118,9 @@ importers:
       glob:
         specifier: ^10.3.0
         version: 10.4.5
+      mongodb:
+        specifier: ^6.16.0
+        version: 6.16.0(socks@2.8.4)
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*

@@ -23,15 +23,16 @@
   "license": "MIT",
   "dependencies": {
     "diff": "^5.1.0",
-    "glob": "^10.3.0"
+    "glob": "^10.3.0",
+    "mongodb": "^6.16.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0",
+    "@repo/typescript-config": "workspace:*",
     "@types/diff": "^5.0.0",
+    "@types/node": "^20.0.0",
     "tsx": "^4.0.0",
-    "vitest": "^1.0.0",
-    "@repo/typescript-config": "workspace:*"
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
   },
   "peerDependencies": {
     "@monko/cli": "workspace:*"

@@ -1,5 +1,5 @@
 {
-    "outputDir": "generated",
+    "outputDir": "src/models",
     "excludes": [
       "**/node_modules/**",
       "**/dist/**",
