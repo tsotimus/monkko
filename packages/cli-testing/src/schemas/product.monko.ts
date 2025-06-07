@@ -10,5 +10,4 @@ export const Product = defineSchema({
     description: fields.string({ required: false }),
     inStock: fields.boolean({ required: true })
   },
-  options: { timestamps: false }
 }); 
