@@ -1,5 +1,5 @@
 {
-    "outputDir": "src/models",
+    "outputDir": "src/types/db",
     "excludes": [
       "**/node_modules/**",
       "**/dist/**",

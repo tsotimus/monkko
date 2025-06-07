@@ -2,8 +2,6 @@
   "name": "@monko/cli-testing",
   "version": "0.1.0",
   "description": "Testing utilities for validating Monko CLI code generation",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "test": "vitest",
@@ -33,7 +31,7 @@
     "@types/node": "^20.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^3.0.0"
   },
   "peerDependencies": {
     "@monko/cli": "workspace:*"

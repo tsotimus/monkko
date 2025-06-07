@@ -35,7 +35,10 @@ export default [
       dir: 'dist',
       format: 'esm',
       sourcemap: true,
-      entryFileNames: '[name]/index.js',
+      entryFileNames: (chunkInfo) => {
+        // Put the main index.js at the root, subpath exports in subdirectories
+        return chunkInfo.name === 'index' ? 'index.js' : '[name]/index.js';
+      },
       chunkFileNames: 'chunks/[name]-[hash].js'
     },
     external: [...EXTERNAL_DEPS],
