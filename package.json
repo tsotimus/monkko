@@ -9,7 +9,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "cli:test": "turbo run test generate --filter=@monko/cli-testing"
+    "cli:test": "turbo run generate --filter=@monko/cli-testing && turbo run test --filter=@monko/cli-testing"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
