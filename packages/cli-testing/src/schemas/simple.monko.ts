@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defineSchema, fields } from "@monko/orm";
 
 export const Product = defineSchema({

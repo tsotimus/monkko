@@ -9,7 +9,7 @@ export interface ObjectIdField extends ObjectIdFieldProps {
     type: "objectId";
 }
 
-export const createObjectIdField = (props: ObjectIdField): ObjectIdField => {
+export const createObjectIdField = (props: ObjectIdFieldProps): ObjectIdField => {
     return {
         ...props,
         type: 'objectId',

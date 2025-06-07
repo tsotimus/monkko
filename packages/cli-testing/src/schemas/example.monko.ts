@@ -22,7 +22,6 @@ export const Post = defineSchema({
     content: fields.string({ required: true }),
     authorId: fields.objectId({ required: true }),
     publishedAt: fields.date({ required: false }),
-    tags: fields.array({ required: false })
   },
   options: { timestamps: true }
 }); 
