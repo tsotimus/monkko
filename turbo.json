@@ -13,8 +13,13 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
-    "generate": {},
+    "generate": {
+      "cache": false
+    },
     "test": {},
+    "@monko/cli-testing#test": {
+      "dependsOn": ["generate"]
+    },
     "test:watch": {
       "cache": false,
       "persistent": true
