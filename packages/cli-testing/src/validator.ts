@@ -2,7 +2,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { glob } from 'glob';
 import { diffLines, type Change } from 'diff';
-import type { ComparisonResult, TestCase, TestResult } from './types.js';
+import type { ComparisonResult, TestCase, TestResult } from './types/index.js';
 
 export class FileValidator {
   constructor(
