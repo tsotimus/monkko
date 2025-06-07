@@ -24,7 +24,8 @@
   "dependencies": {
     "diff": "^5.1.0",
     "glob": "^10.3.0",
-    "mongodb": "^6.16.0"
+    "mongodb": "^6.16.0",
+    "@monko/orm": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

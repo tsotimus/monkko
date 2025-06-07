@@ -112,6 +112,9 @@ importers:
       '@monko/cli':
         specifier: workspace:*
         version: link:../cli
+      '@monko/orm':
+        specifier: workspace:*
+        version: link:../orm
       diff:
         specifier: ^5.1.0
         version: 5.2.0
