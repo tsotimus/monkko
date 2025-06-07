@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/monko/kit/cmd/generate"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,6 @@ func main() {
 
 func init() {
 	// Add commands
-	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(generate.Cmd)
 	rootCmd.AddCommand(initCmd)
 }
