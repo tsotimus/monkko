@@ -129,7 +129,18 @@ func findSchemaFiles(config *Config) ([]string, error) {
 	}
 
 	for _, searchPath := range searchPaths {
-		err := filepath.Walk(searchPath, func(path string, info os.FileInfo, err error) error {
+		// Clean up glob patterns - filepath.Walk is already recursive
+		// Convert "src/schemas/**" to "src/schemas"
+		cleanPath := strings.TrimSuffix(searchPath, "/**")
+		cleanPath = strings.TrimSuffix(cleanPath, "/*")
+
+		// Check if directory exists
+		if _, err := os.Stat(cleanPath); os.IsNotExist(err) {
+			fmt.Printf("⚠️  Directory %s does not exist, skipping...\n", cleanPath)
+			continue
+		}
+
+		err := filepath.Walk(cleanPath, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
