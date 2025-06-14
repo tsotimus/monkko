@@ -25,11 +25,25 @@ beforeAll(async () => {
     }
 });
 
+function getFields() {
+    const allFields: Record<string, string[]> = {};
+
+    for (const schemaFile of loadedSchemas) {
+        for (const schemaName in schemaFile.schemas) {
+            const schema = schemaFile.schemas[schemaName];
+            if (schema && schema.fields) {
+                const fieldKeys = Object.keys(schema.fields);
+                allFields[schemaName] = fieldKeys;
+            }
+        }
+    }
+
+    return allFields;
+}
+
 describe("Field confirmation", () => {
     it("should confirm that the fields are correct", () => {
-        console.log(loadedSchemas);
-        // const fields = getFields();
-        // console.log(fields);
-        // expect(fields).toBeDefined();
+        const fields = getFields();
+        console.log(fields);
     });
 });
