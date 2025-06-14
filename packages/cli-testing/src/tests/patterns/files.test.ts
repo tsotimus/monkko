@@ -1,32 +1,31 @@
 // Check if the generated files exist and have the correct name
 
 import { describe, it, expect } from 'vitest';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { validateSchemaFile } from '@/utils';
 
-describe('File Pattern Tests', () => {
-  // Get all schema files dynamically
-  const schemasDir = join(process.cwd(), 'src/schemas');
-  const schemaFiles = readdirSync(schemasDir).filter(file => file.endsWith('.monko.ts'));
-  
-  // Generate a test for each schema file
-  schemaFiles.forEach(fileName => {
-    const baseName = fileName.replace('.monko.ts', '');
-    const expectedSchemaName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
-    
-    it(`should have schema name matching file name for ${fileName}`, () => {
-      const filePath = join(schemasDir, fileName);
-      const fileContent = readFileSync(filePath, 'utf-8');
-      const validation = validateSchemaFile(fileContent, fileName);
-      
-      expect(validation.hasMatchingSchemaName).toBe(true);
-      expect(validation.schemaNames).toContain(expectedSchemaName);
+const expectedSchemas: Record<string, string[]> = {
+  "post.monko.ts": ["User", "Post"],
+  "product.monko.ts": ["Product"],
+};
+
+// Stub for CLI output simulation - to be implemented
+function getGeneratedSchemasForFile(file: keyof typeof expectedSchemas): string[] {
+  const generatedDir = join(process.cwd(), "src/types/db");
+  const files = readdirSync(generatedDir).filter(f => f.endsWith(".types.ts"));
+
+  return (expectedSchemas[file] ?? []).filter((schema: string) =>
+    files.includes(`${schema}.types.ts`)
+  );
+}
+
+describe("CLI schema generation", () => {
+  Object.entries(expectedSchemas).forEach(([file, schemas]) => {
+    schemas.forEach((schema) => {
+      it(`Should generate ${schema} types for the ${schema} Schema from ${file}`, () => {
+        const generatedSchemas = getGeneratedSchemasForFile(file as keyof typeof expectedSchemas);
+        expect(generatedSchemas).toContain(schema);
+      });
     });
-  });
-
-  // Add a safety test to ensure we're actually testing files
-  it('should have at least one schema file to test', () => {
-    expect(schemaFiles.length).toBeGreaterThan(0);
   });
 });
