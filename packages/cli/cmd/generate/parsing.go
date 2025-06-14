@@ -1,123 +1,209 @@
 package generate
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
 
+	"github.com/dop251/goja"
+	"github.com/dop251/goja/ast"
+	"github.com/dop251/goja/parser"
 	"github.com/evanw/esbuild/pkg/api"
 )
 
-// ParseSchemaFiles extracts schemas from .monko.ts files using ESBuild's Go API
+// ParseSchemaFiles iterates through files and extracts schemas.
 func ParseSchemaFiles(files []string) ([]Schema, error) {
+	fmt.Println("🔎 Starting schema parsing...")
 	var allSchemas []Schema
 
 	for _, file := range files {
+		fmt.Printf("📄 Parsing file: %s\n", file)
 		schemas, err := parseSchemaFile(file)
 		if err != nil {
-			return nil, fmt.Errorf("error parsing %s: %w", file, err)
+			// Provide context for the error
+			return nil, fmt.Errorf("error parsing schemas from %s: %w", file, err)
 		}
 		allSchemas = append(allSchemas, schemas...)
 	}
 
+	fmt.Println("✅ Finished schema parsing.")
 	return allSchemas, nil
 }
 
-// parseSchemaFile parses a single .monko.ts file and extracts schema definitions
+// parseSchemaFile uses esbuild to transform TS to JS, then goja to parse and inspect the AST.
 func parseSchemaFile(filename string) ([]Schema, error) {
-	// Read the source file
 	sourceCode, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
+	fmt.Printf("... Read %d bytes from %s\n", len(sourceCode), filename)
 
-	// Transform TypeScript to JavaScript using ESBuild
+	// Step 1: Use esbuild's Transform API to convert TypeScript to JavaScript
 	result := api.Transform(string(sourceCode), api.TransformOptions{
-		Loader:     api.LoaderTS,
-		Format:     api.FormatESModule,
-		Target:     api.ES2020,
 		Sourcefile: filename,
+		Loader:     api.LoaderTS,
+		Format:     api.FormatCommonJS,
 	})
 
-	// Check for transformation errors
+	// esbuild's Go API panics on error, so we check the Errors slice.
 	if len(result.Errors) > 0 {
-		var errorMsgs []string
-		for _, err := range result.Errors {
-			errorMsgs = append(errorMsgs, err.Text)
-		}
-		return nil, fmt.Errorf("ESBuild transformation errors: %s", strings.Join(errorMsgs, "; "))
+		firstError := result.Errors[0]
+		return nil, fmt.Errorf("esbuild transform failed: %s at %s:%d:%d", firstError.Text, firstError.Location.File, firstError.Location.Line, firstError.Location.Column)
 	}
 
-	// Parse schemas from the original source code (not transformed)
-	// We use the original source because it's more predictable for regex parsing
-	return extractSchemasFromSource(string(sourceCode), filename)
+	jsCode := string(result.Code)
+
+	// Step 2: Parse the JavaScript code into an AST using goja's parser
+	program, err := parser.ParseFile(nil, "", jsCode, 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse javascript: %w", err)
+	}
+
+	// Step 3: Walk the AST to find 'defineSchema' calls
+	return findSchemasInAST(program, jsCode)
 }
 
-// extractSchemasFromSource uses regex to extract schema definitions from TypeScript source
-func extractSchemasFromSource(sourceCode, filename string) ([]Schema, error) {
+func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 	var schemas []Schema
+	vm := goja.New()
 
-	// Regex to match: export const SchemaName = defineSchema({ ... })
-	defineSchemaRegex := regexp.MustCompile(`export\s+const\s+(\w+)\s*=\s*defineSchema\s*\(\s*({[\s\S]*?})\s*\)`)
-
-	matches := defineSchemaRegex.FindAllStringSubmatch(sourceCode, -1)
-
-	for _, match := range matches {
-		if len(match) != 3 {
-			continue
+	// processNode is a helper to reduce duplication. It extracts the schema
+	// details once a defineSchema call is identified.
+	processNode := func(varName, callee *ast.Identifier, callExpr *ast.CallExpression) error {
+		if callee.Name.String() != "defineSchema" {
+			return nil // Not the function we're looking for
 		}
 
-		variableName := match[1]
-		configString := match[2]
+		fmt.Printf("... Found schema variable: %s\n", varName.Name.String())
 
-		schema, err := parseSchemaConfig(configString, variableName)
+		if len(callExpr.ArgumentList) != 1 {
+			return nil // Skip if defineSchema doesn't have exactly one argument
+		}
+		schemaObjNode := callExpr.ArgumentList[0]
+
+		start := schemaObjNode.Idx0()
+		end := schemaObjNode.Idx1()
+		schemaObjectStr := jsCode[start:end]
+
+		v, err := vm.RunString("(" + schemaObjectStr + ")")
 		if err != nil {
-			return nil, fmt.Errorf("error parsing schema %s: %w", variableName, err)
+			return fmt.Errorf("failed to execute schema object for '%s': %w", varName.Name.String(), err)
 		}
 
+		schemaMap := v.Export()
+		if schemaMap == nil {
+			return fmt.Errorf("failed to export schema object for '%s' to map", varName.Name.String())
+		}
+
+		schema, err := mapToSchema(varName.Name.String(), schemaMap.(map[string]interface{}))
+		if err != nil {
+			return fmt.Errorf("failed to process schema for '%s': %w", varName.Name.String(), err)
+		}
 		schemas = append(schemas, schema)
+		return nil
 	}
 
+	for _, stmt := range program.Body {
+		var err error
+
+		// Case 1: Handle `const mySchema = defineSchema(...)`
+		if varStmt, ok := stmt.(*ast.VariableStatement); ok {
+			for _, binding := range varStmt.List {
+				if binding.Initializer == nil {
+					continue
+				}
+
+				if varName, ok := binding.Target.(*ast.Identifier); ok {
+					if callExpr, ok := binding.Initializer.(*ast.CallExpression); ok {
+						if callee, ok := callExpr.Callee.(*ast.Identifier); ok {
+							err = processNode(varName, callee, callExpr)
+						}
+					}
+				}
+			}
+		}
+
+		// Case 2: Handle `exports.mySchema = defineSchema(...)` (from CommonJS)
+		if exprStmt, ok := stmt.(*ast.ExpressionStatement); ok {
+			if assignExpr, ok := exprStmt.Expression.(*ast.AssignExpression); ok {
+				if dotExpr, ok := assignExpr.Left.(*ast.DotExpression); ok {
+					if exports, ok := dotExpr.Left.(*ast.Identifier); ok && exports.Name.String() == "exports" {
+						if callExpr, ok := assignExpr.Right.(*ast.CallExpression); ok {
+							if callee, ok := callExpr.Callee.(*ast.Identifier); ok {
+								err = processNode(&dotExpr.Identifier, callee, callExpr)
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
 	return schemas, nil
 }
 
-// parseSchemaConfig parses the schema configuration object
-func parseSchemaConfig(configString, variableName string) (Schema, error) {
+// mapToSchema converts a map[string]interface{} from goja into our typed Schema struct.
+func mapToSchema(varName string, schemaMap map[string]interface{}) (Schema, error) {
+	fmt.Printf("...... Parsing config for schema: %s\n", varName)
+
+	// Set default values
 	schema := Schema{
-		Name:       variableName,
-		DB:         "default",
-		Collection: strings.ToLower(variableName),
+		Name:       varName,
+		Collection: strings.ToLower(varName),
 		Fields:     make(map[string]Field),
-		Options:    Options{},
 	}
 
-	// Extract basic string properties
-	if name := extractStringProperty(configString, "name"); name != "" {
+	// Extract top-level properties
+	if name, ok := schemaMap["name"].(string); ok {
 		schema.Name = name
 	}
-	if db := extractStringProperty(configString, "db"); db != "" {
+	if db, ok := schemaMap["db"].(string); ok {
 		schema.DB = db
 	}
-	if collection := extractStringProperty(configString, "collection"); collection != "" {
+	if collection, ok := schemaMap["collection"].(string); ok {
 		schema.Collection = collection
 	}
+	fmt.Printf("......... Name: %s, DB: %s, Collection: %s\n", schema.Name, schema.DB, schema.Collection)
 
-	// Extract fields object
-	if fieldsString := extractObjectProperty(configString, "fields"); fieldsString != "" {
-		fields, err := parseFields(fieldsString)
-		if err != nil {
-			return schema, fmt.Errorf("error parsing fields: %w", err)
+	// Extract fields
+	if fieldsMap, ok := schemaMap["fields"].(map[string]interface{}); ok {
+		fmt.Println("......... Found fields object. Parsing fields...")
+		fields := make(map[string]Field)
+		for fieldName, fieldVal := range fieldsMap {
+			fieldObj, ok := fieldVal.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			field := Field{}
+			if fType, ok := fieldObj["type"].(string); ok {
+				field.Type = fType
+			}
+			if required, ok := fieldObj["required"].(bool); ok {
+				field.Required = required
+			}
+			if unique, ok := fieldObj["unique"].(bool); ok {
+				field.Unique = unique
+			}
+			if optional, ok := fieldObj["optional"].(bool); ok {
+				field.Optional = optional
+			}
+			fmt.Printf("............... Found field: %s, Type: %s\n", fieldName, field.Type)
+			fields[fieldName] = field
 		}
 		schema.Fields = fields
 	}
 
-	// Extract options object
-	if optionsString := extractObjectProperty(configString, "options"); optionsString != "" {
-		options, err := parseOptions(optionsString)
-		if err != nil {
-			return schema, fmt.Errorf("error parsing options: %w", err)
+	// Extract options
+	if optionsMap, ok := schemaMap["options"].(map[string]interface{}); ok {
+		fmt.Println("......... Found options object. Parsing options...")
+		options := Options{}
+		if timestamps, ok := optionsMap["timestamps"].(bool); ok {
+			options.Timestamps = timestamps
+			fmt.Printf("............... Found timestamps: %t\n", timestamps)
 		}
 		schema.Options = options
 	}
@@ -125,96 +211,11 @@ func parseSchemaConfig(configString, variableName string) (Schema, error) {
 	return schema, nil
 }
 
-// parseFields parses the fields object from the schema configuration
-func parseFields(fieldsString string) (map[string]Field, error) {
-	fields := make(map[string]Field)
-
-	// Regex to match: fieldName: fields.type({ options })
-	fieldRegex := regexp.MustCompile(`(\w+)\s*:\s*fields\.(\w+)\s*\(\s*({[^}]*})?\s*\)`)
-
-	matches := fieldRegex.FindAllStringSubmatch(fieldsString, -1)
-
-	for _, match := range matches {
-		if len(match) < 3 {
-			continue
-		}
-
-		fieldName := match[1]
-		fieldType := match[2]
-		optionsString := ""
-		if len(match) > 3 {
-			optionsString = match[3]
-		}
-
-		field := Field{
-			Type:     fieldType,
-			Required: false,
-			Unique:   false,
-			Optional: false,
-		}
-
-		// Parse field options if present
-		if optionsString != "" {
-			if required := extractBoolProperty(optionsString, "required"); required != nil {
-				field.Required = *required
-			}
-			if unique := extractBoolProperty(optionsString, "unique"); unique != nil {
-				field.Unique = *unique
-			}
-			if optional := extractBoolProperty(optionsString, "optional"); optional != nil {
-				field.Optional = *optional
-			}
-		}
-
-		fields[fieldName] = field
+// A simple utility to pretty-print schemas as JSON for debugging
+func (s Schema) ToJSON() string {
+	b, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		return ""
 	}
-
-	return fields, nil
-}
-
-// parseOptions parses the options object from the schema configuration
-func parseOptions(optionsString string) (Options, error) {
-	options := Options{}
-
-	if timestamps := extractBoolProperty(optionsString, "timestamps"); timestamps != nil {
-		options.Timestamps = *timestamps
-	}
-
-	return options, nil
-}
-
-// Helper functions for extracting properties using regex
-
-func extractStringProperty(source, propertyName string) string {
-	pattern := fmt.Sprintf(`%s\s*:\s*["']([^"']+)["']`, propertyName)
-	regex := regexp.MustCompile(pattern)
-	matches := regex.FindStringSubmatch(source)
-	if len(matches) > 1 {
-		return matches[1]
-	}
-	return ""
-}
-
-func extractObjectProperty(source, propertyName string) string {
-	// This is a simplified approach - for nested objects, we'll need more sophisticated parsing
-	pattern := fmt.Sprintf(`%s\s*:\s*{([^{}]*(?:{[^{}]*}[^{}]*)*)}`, propertyName)
-	regex := regexp.MustCompile(pattern)
-	matches := regex.FindStringSubmatch(source)
-	if len(matches) > 1 {
-		return matches[1]
-	}
-	return ""
-}
-
-func extractBoolProperty(source, propertyName string) *bool {
-	pattern := fmt.Sprintf(`%s\s*:\s*(true|false)`, propertyName)
-	regex := regexp.MustCompile(pattern)
-	matches := regex.FindStringSubmatch(source)
-	if len(matches) > 1 {
-		value, err := strconv.ParseBool(matches[1])
-		if err == nil {
-			return &value
-		}
-	}
-	return nil
+	return string(b)
 }

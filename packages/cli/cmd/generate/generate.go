@@ -35,7 +35,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("📄 Found %d schema file(s)\n", len(schemaFiles))
 
-	// Step 3: Extract schemas using Node.js
+	// Step 3: Extract schemas
 	schemas, err := ExtractSchemas(schemaFiles)
 	if err != nil {
 		return fmt.Errorf("failed to extract schemas: %w", err)

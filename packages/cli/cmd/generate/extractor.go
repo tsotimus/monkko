@@ -20,11 +20,3 @@ func ExtractSchemas(files []string) ([]Schema, error) {
 
 	return schemas, nil
 }
-
-// getEmbeddedScript returns the embedded Node.js script
-// This function will be implemented to access the script from the main package
-func getEmbeddedScript() string {
-	// This will be implemented to access the embedded script
-	// For now, we'll need to import it from the main package
-	return ""
-}
