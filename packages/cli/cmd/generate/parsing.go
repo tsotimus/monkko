@@ -1,12 +1,10 @@
 package generate
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/dop251/goja"
 	"github.com/dop251/goja/ast"
 	"github.com/dop251/goja/parser"
 	"github.com/evanw/esbuild/pkg/api"
@@ -48,11 +46,19 @@ func parseSchemaFile(filename string) ([]Schema, error) {
 
 	// esbuild's Go API panics on error, so we check the Errors slice.
 	if len(result.Errors) > 0 {
-		firstError := result.Errors[0]
-		return nil, fmt.Errorf("esbuild transform failed: %s at %s:%d:%d", firstError.Text, firstError.Location.File, firstError.Location.Line, firstError.Location.Column)
+		errorMessages := api.FormatMessages(result.Errors, api.FormatMessagesOptions{
+			Kind:  api.ErrorMessage,
+			Color: true,
+		})
+		// Each message is a formatted string, join them for a single print.
+		fmt.Fprintln(os.Stderr, "❌ Esbuild transform failed with errors:")
+		fmt.Fprint(os.Stderr, strings.Join(errorMessages, ""))
+		os.Exit(1)
 	}
 
 	jsCode := string(result.Code)
+
+	// fmt.Println(jsCode)
 
 	// Step 2: Parse the JavaScript code into an AST using goja's parser
 	program, err := parser.ParseFile(nil, "", jsCode, 0)
@@ -64,73 +70,111 @@ func parseSchemaFile(filename string) ([]Schema, error) {
 	return findSchemasInAST(program, jsCode)
 }
 
+// getDefineSchemaCallee recursively traverses an expression to find the "defineSchema" identifier.
+// It handles simple identifiers, dot expressions (e.g., `orm.defineSchema`), and sequence
+// expressions (e.g., `(0, orm.defineSchema)`), which are common in transpiled code.
+func getDefineSchemaCallee(expr ast.Expression) *ast.Identifier {
+	switch e := expr.(type) {
+	case *ast.Identifier:
+		if e.Name.String() == "defineSchema" {
+			return e
+		}
+	case *ast.DotExpression:
+		if e.Identifier.Name.String() == "defineSchema" {
+			return &e.Identifier
+		}
+	case *ast.SequenceExpression:
+		if len(e.Sequence) > 0 {
+			// The value of a sequence expression is its last expression.
+			return getDefineSchemaCallee(e.Sequence[len(e.Sequence)-1])
+		}
+	}
+	return nil
+}
+
+// processBindings abstracts the logic for finding defineSchema calls within
+// a list of variable bindings, which is common to both VariableStatement
+// and LexicalDeclaration.
+func processBindings(bindings []*ast.Binding, calleeFn func(ast.Expression) *ast.Identifier, processFn func(*ast.Identifier, *ast.Identifier, *ast.CallExpression) error) error {
+	for _, binding := range bindings {
+		if binding.Initializer == nil {
+			continue
+		}
+
+		callExpr, ok := binding.Initializer.(*ast.CallExpression)
+		if !ok {
+			continue
+		}
+
+		callee := calleeFn(callExpr.Callee)
+		if callee == nil {
+			continue
+		}
+
+		if varName, ok := binding.Target.(*ast.Identifier); ok {
+			fmt.Printf("... Analyzing call expression for variable: %s\n", varName.Name.String())
+			fmt.Printf("... Callee is: %s\n", callee.Name.String())
+			if err := processFn(varName, callee, callExpr); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 	var schemas []Schema
-	vm := goja.New()
 
-	// processNode is a helper to reduce duplication. It extracts the schema
-	// details once a defineSchema call is identified.
 	processNode := func(varName, callee *ast.Identifier, callExpr *ast.CallExpression) error {
 		if callee.Name.String() != "defineSchema" {
-			return nil // Not the function we're looking for
+			return nil
 		}
 
 		fmt.Printf("... Found schema variable: %s\n", varName.Name.String())
 
 		if len(callExpr.ArgumentList) != 1 {
-			return nil // Skip if defineSchema doesn't have exactly one argument
+			return fmt.Errorf("defineSchema expects exactly one argument for '%s'", varName.Name.String())
 		}
-		schemaObjNode := callExpr.ArgumentList[0]
+		schemaObjNode, ok := callExpr.ArgumentList[0].(*ast.ObjectLiteral)
+		if !ok {
+			return fmt.Errorf("expected schema definition to be an object literal for '%s'", varName.Name.String())
+		}
 
-		start := schemaObjNode.Idx0()
-		end := schemaObjNode.Idx1()
-		schemaObjectStr := jsCode[start:end]
-
-		v, err := vm.RunString("(" + schemaObjectStr + ")")
+		// Convert AST object to map[string]interface{}
+		schemaMapInterface, err := convertASTNodeToValue(schemaObjNode)
 		if err != nil {
-			return fmt.Errorf("failed to execute schema object for '%s': %w", varName.Name.String(), err)
+			return fmt.Errorf("error converting schema AST to map for '%s': %w", varName.Name.String(), err)
 		}
 
-		schemaMap := v.Export()
-		if schemaMap == nil {
-			return fmt.Errorf("failed to export schema object for '%s' to map", varName.Name.String())
+		schemaMap, ok := schemaMapInterface.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("internal error: converted schema AST is not a map for '%s'", varName.Name.String())
 		}
 
-		schema, err := mapToSchema(varName.Name.String(), schemaMap.(map[string]interface{}))
+		// Use the existing mapToSchema function from maps.go
+		schema, err := mapToSchema(varName.Name.String(), schemaMap)
 		if err != nil {
-			return fmt.Errorf("failed to process schema for '%s': %w", varName.Name.String(), err)
+			return fmt.Errorf("error mapping schema for '%s': %w", varName.Name.String(), err)
 		}
+
 		schemas = append(schemas, schema)
 		return nil
 	}
 
 	for _, stmt := range program.Body {
 		var err error
-
-		// Case 1: Handle `const mySchema = defineSchema(...)`
 		if varStmt, ok := stmt.(*ast.VariableStatement); ok {
-			for _, binding := range varStmt.List {
-				if binding.Initializer == nil {
-					continue
-				}
-
-				if varName, ok := binding.Target.(*ast.Identifier); ok {
-					if callExpr, ok := binding.Initializer.(*ast.CallExpression); ok {
-						if callee, ok := callExpr.Callee.(*ast.Identifier); ok {
-							err = processNode(varName, callee, callExpr)
-						}
-					}
-				}
-			}
+			err = processBindings(varStmt.List, getDefineSchemaCallee, processNode)
 		}
-
-		// Case 2: Handle `exports.mySchema = defineSchema(...)` (from CommonJS)
+		if lexDecl, ok := stmt.(*ast.LexicalDeclaration); ok {
+			err = processBindings(lexDecl.List, getDefineSchemaCallee, processNode)
+		}
 		if exprStmt, ok := stmt.(*ast.ExpressionStatement); ok {
 			if assignExpr, ok := exprStmt.Expression.(*ast.AssignExpression); ok {
 				if dotExpr, ok := assignExpr.Left.(*ast.DotExpression); ok {
 					if exports, ok := dotExpr.Left.(*ast.Identifier); ok && exports.Name.String() == "exports" {
 						if callExpr, ok := assignExpr.Right.(*ast.CallExpression); ok {
-							if callee, ok := callExpr.Callee.(*ast.Identifier); ok {
+							if callee := getDefineSchemaCallee(callExpr.Callee); callee != nil {
 								err = processNode(&dotExpr.Identifier, callee, callExpr)
 							}
 						}
@@ -138,7 +182,6 @@ func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 				}
 			}
 		}
-
 		if err != nil {
 			return nil, err
 		}
@@ -146,76 +189,80 @@ func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 	return schemas, nil
 }
 
-// mapToSchema converts a map[string]interface{} from goja into our typed Schema struct.
-func mapToSchema(varName string, schemaMap map[string]interface{}) (Schema, error) {
-	fmt.Printf("...... Parsing config for schema: %s\n", varName)
-
-	// Set default values
-	schema := Schema{
-		Name:       varName,
-		Collection: strings.ToLower(varName),
-		Fields:     make(map[string]Field),
+// getKeyFromPropertyKeyed extracts the string key from a property in an AST object literal.
+// It supports both identifiers (e.g., { name: ... }) and string literals (e.g., { "name": ... }).
+func getKeyFromPropertyKeyed(prop *ast.PropertyKeyed) (string, error) {
+	if keyIdent, ok := prop.Key.(*ast.Identifier); ok {
+		return keyIdent.Name.String(), nil
+	} else if keyStr, ok := prop.Key.(*ast.StringLiteral); ok {
+		return keyStr.Value.String(), nil
 	}
-
-	// Extract top-level properties
-	if name, ok := schemaMap["name"].(string); ok {
-		schema.Name = name
-	}
-	if db, ok := schemaMap["db"].(string); ok {
-		schema.DB = db
-	}
-	if collection, ok := schemaMap["collection"].(string); ok {
-		schema.Collection = collection
-	}
-	fmt.Printf("......... Name: %s, DB: %s, Collection: %s\n", schema.Name, schema.DB, schema.Collection)
-
-	// Extract fields
-	if fieldsMap, ok := schemaMap["fields"].(map[string]interface{}); ok {
-		fmt.Println("......... Found fields object. Parsing fields...")
-		fields := make(map[string]Field)
-		for fieldName, fieldVal := range fieldsMap {
-			fieldObj, ok := fieldVal.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			field := Field{}
-			if fType, ok := fieldObj["type"].(string); ok {
-				field.Type = fType
-			}
-			if required, ok := fieldObj["required"].(bool); ok {
-				field.Required = required
-			}
-			if unique, ok := fieldObj["unique"].(bool); ok {
-				field.Unique = unique
-			}
-			if optional, ok := fieldObj["optional"].(bool); ok {
-				field.Optional = optional
-			}
-			fmt.Printf("............... Found field: %s, Type: %s\n", fieldName, field.Type)
-			fields[fieldName] = field
-		}
-		schema.Fields = fields
-	}
-
-	// Extract options
-	if optionsMap, ok := schemaMap["options"].(map[string]interface{}); ok {
-		fmt.Println("......... Found options object. Parsing options...")
-		options := Options{}
-		if timestamps, ok := optionsMap["timestamps"].(bool); ok {
-			options.Timestamps = timestamps
-			fmt.Printf("............... Found timestamps: %t\n", timestamps)
-		}
-		schema.Options = options
-	}
-
-	return schema, nil
+	return "", fmt.Errorf("unsupported property key type: %T", prop.Key)
 }
 
-// A simple utility to pretty-print schemas as JSON for debugging
-func (s Schema) ToJSON() string {
-	b, err := json.MarshalIndent(s, "", "  ")
-	if err != nil {
-		return ""
+// convertASTNodeToValue recursively converts an AST expression node into a Go interface{}.
+// It handles literals, objects, and the special `fields.type()` call expressions
+// to build a map that can be passed to the `mapToSchema` function.
+func convertASTNodeToValue(node ast.Expression) (interface{}, error) {
+	switch n := node.(type) {
+	case *ast.StringLiteral:
+		return n.Value.String(), nil
+	case *ast.NumberLiteral:
+		return n.Value, nil
+	case *ast.BooleanLiteral:
+		return n.Value, nil
+	case *ast.NullLiteral:
+		return nil, nil
+	case *ast.ObjectLiteral:
+		objMap := make(map[string]interface{})
+		for _, propNode := range n.Value {
+			prop, ok := propNode.(*ast.PropertyKeyed)
+			if !ok {
+				continue // Or handle other property types if needed
+			}
+			key, err := getKeyFromPropertyKeyed(prop)
+			if err != nil {
+				return nil, err
+			}
+			val, err := convertASTNodeToValue(prop.Value)
+			if err != nil {
+				return nil, err
+			}
+			objMap[key] = val
+		}
+		return objMap, nil
+	case *ast.CallExpression:
+		// This is for handling field definitions like `fields.string({ required: true })`
+		callee, ok := n.Callee.(*ast.DotExpression)
+		if !ok {
+			return nil, fmt.Errorf("unsupported call expression callee type: %T", n.Callee)
+		}
+
+		// The type is the identifier, e.g., "string" from "fields.string"
+		fieldType := callee.Identifier.Name.String()
+
+		var configMap map[string]interface{}
+		// The arguments to the call are the field configs
+		if len(n.ArgumentList) > 0 {
+			if argObj, ok := n.ArgumentList[0].(*ast.ObjectLiteral); ok {
+				val, err := convertASTNodeToValue(argObj)
+				if err != nil {
+					return nil, err
+				}
+				if val != nil {
+					configMap, _ = val.(map[string]interface{})
+				}
+			}
+		}
+		if configMap == nil {
+			configMap = make(map[string]interface{})
+		}
+
+		// Inject the "type" property, which mapToSchema expects
+		configMap["type"] = fieldType
+
+		return configMap, nil
+	default:
+		return nil, fmt.Errorf("unsupported AST node type for conversion: %T", n)
 	}
-	return string(b)
 }
