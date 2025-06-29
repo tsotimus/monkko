@@ -4,16 +4,11 @@ import { loadSchemas, SchemaFile } from '@/utils/schemas/loadSchemas';
 import { getSchemaFields } from '@/utils/schemas/getSchemaFields';
 import { getSchemaOptions } from '@/utils/schemas/getSchemaOptions';
 
-
-
-
-
 let loadedSchemas: SchemaFile[] = [];
 
 beforeAll(async () => {
     loadedSchemas = await loadSchemas();
 });
-
 
 
 
