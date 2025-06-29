@@ -1,7 +1,10 @@
 import { describe, it, beforeAll, expect } from 'vitest';
-import { getGeneratedFields } from '@/utils/getGeneratedFields';
+import { getGeneratedFields } from '@/utils/generation/types/getGeneratedFields';
 import { loadSchemas, SchemaFile } from '@/utils/schemas/loadSchemas';
 import { getSchemaFields } from '@/utils/schemas/getSchemaFields';
+import { getSchemaOptions } from '@/utils/schemas/getSchemaOptions';
+
+
 
 
 
@@ -40,7 +43,22 @@ describe("Field confirmation", () => {
         }
     });
 
-    it("")
+    it("if timestamps is true, createdAt and updatedAt are present", () => {
+        const options = getSchemaOptions(loadedSchemas);
+
+        for (const schemaName of Object.keys(options)) {
+            const schemaOptions = options[schemaName];
+            if (schemaOptions?.timestamps) {
+                const generatedFields = getGeneratedFields(schemaName);
+                expect(generatedFields).toContain('createdAt');
+                expect(generatedFields).toContain('updatedAt');
+            } else {
+                const generatedFields = getGeneratedFields(schemaName);
+                expect(generatedFields).not.toContain('createdAt');
+                expect(generatedFields).not.toContain('updatedAt');
+            }
+        }
+    });
 
 });
 
