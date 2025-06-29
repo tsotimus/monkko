@@ -4,7 +4,6 @@ export { compareAllFiles } from './compareAllFiles';
 export { fileExists } from './fileExists';
 export { getExpectedFiles } from './getExpectedFiles';
 export { normalizeContent } from './normalizeContent';
-export { expectFilesToMatch } from './expectFilesToMatch';
 export { 
   extractSchemaNames, 
   validateSchemaFile, 
