@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func LoadConfig() (*Config, error) {
+func LoadConfig(debug bool) (*Config, error) {
 	// Default config (fallback if no config file)
 	config := &Config{
 		OutputDir: "generated", // Fallback if no config file
@@ -14,7 +14,9 @@ func LoadConfig() (*Config, error) {
 
 	// Try to load monko.config.json
 	if _, err := os.Stat("monko.config.json"); err == nil {
-		fmt.Println("📝 Loading monko.config.json...")
+		if debug {
+			fmt.Println("📝 Loading monko.config.json...")
+		}
 
 		data, err := os.ReadFile("monko.config.json")
 		if err != nil {
@@ -37,7 +39,7 @@ func LoadConfig() (*Config, error) {
 			config.Excludes = userConfig.Excludes
 		}
 	} else {
-		fmt.Println("💡 No monko.config.json found. Run '@monko/cli init' to create one.")
+		return nil, fmt.Errorf("no monko.config.json found. Run '@monko/cli init' to create one")
 	}
 
 	return config, nil

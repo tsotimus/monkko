@@ -7,7 +7,11 @@ import (
 	"text/template"
 )
 
-func GenerateTypes(schemas []Schema, outputDir string) error {
+func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
+	if debug {
+		fmt.Printf("🔧 Creating output directory: %s\n", outputDir)
+	}
+
 	// Create output directory if it doesn't exist
 	err := os.MkdirAll(outputDir, 0755)
 	if err != nil {
@@ -27,7 +31,9 @@ func GenerateTypes(schemas []Schema, outputDir string) error {
 			return fmt.Errorf("failed to write file %s: %w", filename, err)
 		}
 
-		fmt.Printf("  📝 %s\n", filename)
+		if debug {
+			fmt.Printf("  📝 %s\n", filename)
+		}
 	}
 
 	return nil

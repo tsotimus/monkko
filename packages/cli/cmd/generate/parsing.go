@@ -11,13 +11,17 @@ import (
 )
 
 // ParseSchemaFiles iterates through files and extracts schemas.
-func ParseSchemaFiles(files []string) ([]Schema, error) {
-	fmt.Println("🔎 Starting schema parsing...")
+func ParseSchemaFiles(files []string, debug bool) ([]Schema, error) {
+	if debug {
+		fmt.Println("🔎 Starting schema parsing...")
+	}
 	var allSchemas []Schema
 
 	for _, file := range files {
-		fmt.Printf("📄 Parsing file: %s\n", file)
-		schemas, err := parseSchemaFile(file)
+		if debug {
+			fmt.Printf("📄 Parsing file: %s\n", file)
+		}
+		schemas, err := parseSchemaFile(file, debug)
 		if err != nil {
 			// Provide context for the error
 			return nil, fmt.Errorf("error parsing schemas from %s: %w", file, err)
@@ -25,17 +29,21 @@ func ParseSchemaFiles(files []string) ([]Schema, error) {
 		allSchemas = append(allSchemas, schemas...)
 	}
 
-	fmt.Println("✅ Finished schema parsing.")
+	if debug {
+		fmt.Println("✅ Finished schema parsing.")
+	}
 	return allSchemas, nil
 }
 
 // parseSchemaFile uses esbuild to transform TS to JS, then goja to parse and inspect the AST.
-func parseSchemaFile(filename string) ([]Schema, error) {
+func parseSchemaFile(filename string, debug bool) ([]Schema, error) {
 	sourceCode, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-	fmt.Printf("... Read %d bytes from %s\n", len(sourceCode), filename)
+	if debug {
+		fmt.Printf("... Read %d bytes from %s\n", len(sourceCode), filename)
+	}
 
 	// Step 1: Use esbuild's Transform API to convert TypeScript to JavaScript
 	result := api.Transform(string(sourceCode), api.TransformOptions{
@@ -67,7 +75,7 @@ func parseSchemaFile(filename string) ([]Schema, error) {
 	}
 
 	// Step 3: Walk the AST to find 'defineSchema' calls
-	return findSchemasInAST(program, jsCode)
+	return findSchemasInAST(program, jsCode, debug)
 }
 
 // getDefineSchemaCallee recursively traverses an expression to find the "defineSchema" identifier.
@@ -95,7 +103,7 @@ func getDefineSchemaCallee(expr ast.Expression) *ast.Identifier {
 // processBindings abstracts the logic for finding defineSchema calls within
 // a list of variable bindings, which is common to both VariableStatement
 // and LexicalDeclaration.
-func processBindings(bindings []*ast.Binding, calleeFn func(ast.Expression) *ast.Identifier, processFn func(*ast.Identifier, *ast.Identifier, *ast.CallExpression) error) error {
+func processBindings(bindings []*ast.Binding, calleeFn func(ast.Expression) *ast.Identifier, processFn func(*ast.Identifier, *ast.Identifier, *ast.CallExpression) error, debug bool) error {
 	for _, binding := range bindings {
 		if binding.Initializer == nil {
 			continue
@@ -112,8 +120,10 @@ func processBindings(bindings []*ast.Binding, calleeFn func(ast.Expression) *ast
 		}
 
 		if varName, ok := binding.Target.(*ast.Identifier); ok {
-			fmt.Printf("... Analyzing call expression for variable: %s\n", varName.Name.String())
-			fmt.Printf("... Callee is: %s\n", callee.Name.String())
+			if debug {
+				fmt.Printf("... Analyzing call expression for variable: %s\n", varName.Name.String())
+				fmt.Printf("... Callee is: %s\n", callee.Name.String())
+			}
 			if err := processFn(varName, callee, callExpr); err != nil {
 				return err
 			}
@@ -122,7 +132,7 @@ func processBindings(bindings []*ast.Binding, calleeFn func(ast.Expression) *ast
 	return nil
 }
 
-func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
+func findSchemasInAST(program *ast.Program, jsCode string, debug bool) ([]Schema, error) {
 	var schemas []Schema
 
 	processNode := func(varName, callee *ast.Identifier, callExpr *ast.CallExpression) error {
@@ -130,7 +140,9 @@ func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 			return nil
 		}
 
-		fmt.Printf("... Found schema variable: %s\n", varName.Name.String())
+		if debug {
+			fmt.Printf("... Found schema variable: %s\n", varName.Name.String())
+		}
 
 		if len(callExpr.ArgumentList) != 1 {
 			return fmt.Errorf("defineSchema expects exactly one argument for '%s'", varName.Name.String())
@@ -152,7 +164,7 @@ func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 		}
 
 		// Use the existing mapToSchema function from maps.go
-		schema, err := mapToSchema(varName.Name.String(), schemaMap)
+		schema, err := mapToSchema(varName.Name.String(), schemaMap, debug)
 		if err != nil {
 			return fmt.Errorf("error mapping schema for '%s': %w", varName.Name.String(), err)
 		}
@@ -164,10 +176,10 @@ func findSchemasInAST(program *ast.Program, jsCode string) ([]Schema, error) {
 	for _, stmt := range program.Body {
 		var err error
 		if varStmt, ok := stmt.(*ast.VariableStatement); ok {
-			err = processBindings(varStmt.List, getDefineSchemaCallee, processNode)
+			err = processBindings(varStmt.List, getDefineSchemaCallee, processNode, debug)
 		}
 		if lexDecl, ok := stmt.(*ast.LexicalDeclaration); ok {
-			err = processBindings(lexDecl.List, getDefineSchemaCallee, processNode)
+			err = processBindings(lexDecl.List, getDefineSchemaCallee, processNode, debug)
 		}
 		if exprStmt, ok := stmt.(*ast.ExpressionStatement); ok {
 			if assignExpr, ok := exprStmt.Expression.(*ast.AssignExpression); ok {

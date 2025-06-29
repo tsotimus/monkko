@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Flag variables
+var debugFlag bool
+
 var Cmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate TypeScript types from Monko schemas",
@@ -13,15 +16,27 @@ var Cmd = &cobra.Command{
 	RunE:  runGenerate,
 }
 
-func runGenerate(cmd *cobra.Command, args []string) error {
-	fmt.Println("🚀 Generating TypeScript types from Monko schemas...")
+func init() {
+	// Add the --debug flag
+	Cmd.Flags().BoolVar(&debugFlag, "debug", false, "Enable debug output")
+}
 
-	config, err := LoadConfig()
+func runGenerate(cmd *cobra.Command, args []string) error {
+
+	if debugFlag {
+		fmt.Println("🐛 Debug mode enabled")
+	}
+
+	config, err := LoadConfig(debugFlag)
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	schemaFiles, err := FindSchemaFiles(config)
+	if debugFlag {
+		fmt.Printf("🐛 Config loaded: %+v\n", config)
+	}
+
+	schemaFiles, err := FindSchemaFiles(config, debugFlag)
 	if err != nil {
 		return fmt.Errorf("failed to find schema files: %w", err)
 	}
@@ -31,14 +46,20 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	fmt.Printf("📄 Found %d schema file(s)\n", len(schemaFiles))
+	if debugFlag {
+		fmt.Printf("📄 Found %d schema file(s)\n", len(schemaFiles))
+	}
 
-	schemas, err := ExtractSchemas(schemaFiles)
+	schemas, err := ExtractSchemas(schemaFiles, debugFlag)
 	if err != nil {
 		return fmt.Errorf("failed to extract schemas: %w", err)
 	}
 
-	err = GenerateTypes(schemas, config.OutputDir)
+	if debugFlag {
+		fmt.Printf("🐛 Extracted %d schemas\n", len(schemas))
+	}
+
+	err = GenerateTypes(schemas, config.OutputDir, debugFlag)
 	if err != nil {
 		return fmt.Errorf("failed to generate types: %w", err)
 	}

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func FindSchemaFiles(config *Config) ([]string, error) {
+func FindSchemaFiles(config *Config, debug bool) ([]string, error) {
 	var files []string
 
 	// Determine search paths
@@ -24,7 +24,9 @@ func FindSchemaFiles(config *Config) ([]string, error) {
 
 		// Check if directory exists
 		if _, err := os.Stat(cleanPath); os.IsNotExist(err) {
-			fmt.Printf("⚠️  Directory %s does not exist, skipping...\n", cleanPath)
+			if debug {
+				fmt.Printf("⚠️  Directory %s does not exist, skipping...\n", cleanPath)
+			}
 			continue
 		}
 
