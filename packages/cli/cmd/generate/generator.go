@@ -1,11 +1,15 @@
 package generate
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
 	"text/template"
 )
+
+//go:embed templates/schema.tmpl
+var schemaTemplate string
 
 func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 	if debug {
@@ -18,14 +22,14 @@ func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 		return err
 	}
 
-	// Generate types for each schema
+	// Generate schemas for each schema
 	for _, schema := range schemas {
-		content, err := generateTypeContent(schema)
+		content, err := generateSchemaContent(schema)
 		if err != nil {
 			return fmt.Errorf("failed to generate content for %s: %w", schema.Name, err)
 		}
 
-		filename := fmt.Sprintf("%s/%s.types.ts", outputDir, schema.Name)
+		filename := fmt.Sprintf("%s/%s.schema.ts", outputDir, schema.Name)
 		err = os.WriteFile(filename, []byte(content), 0644)
 		if err != nil {
 			return fmt.Errorf("failed to write file %s: %w", filename, err)
@@ -39,24 +43,12 @@ func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 	return nil
 }
 
-func generateTypeContent(schema Schema) (string, error) {
-	tmplContent := `import type { ObjectId } from 'mongodb';
-
-export type {{.Name}}Document = {
-  _id: ObjectId;{{range $fieldName, $field := .Fields}}
-  {{$fieldName}}{{if not $field.Required}}?{{end}}: {{typeScriptType $field.Type}};{{end}}{{if .Options.Timestamps}}
-  createdAt: Date;
-  updatedAt: Date;{{end}}
-}
-
-export type Create{{.Name}}Input = Omit<{{.Name}}Document, '_id'{{if .Options.Timestamps}} | 'createdAt' | 'updatedAt'{{end}}>;
-
-export type Update{{.Name}}Input = Partial<Create{{.Name}}Input>;
-`
-
-	tmpl := template.Must(template.New("typescript").Funcs(template.FuncMap{
-		"typeScriptType": typeScriptType,
-	}).Parse(tmplContent))
+func generateSchemaContent(schema Schema) (string, error) {
+	tmpl := template.Must(template.New("schema").Funcs(template.FuncMap{
+		"typeScriptType":    typeScriptType,
+		"generateValidator": generateValidator,
+		"printf":            fmt.Sprintf,
+	}).Parse(schemaTemplate))
 
 	var result strings.Builder
 	err := tmpl.Execute(&result, schema)
@@ -81,5 +73,24 @@ func typeScriptType(schemaType string) string {
 		return "ObjectId"
 	default:
 		return "any"
+	}
+}
+
+func generateValidator(schemaType string, valueExpr string) string {
+	switch schemaType {
+	case "string":
+		return fmt.Sprintf("typeof %s === 'string'", valueExpr)
+	case "number":
+		return fmt.Sprintf("typeof %s === 'number'", valueExpr)
+	case "boolean":
+		return fmt.Sprintf("typeof %s === 'boolean'", valueExpr)
+	case "date":
+		return fmt.Sprintf("%s instanceof Date", valueExpr)
+	case "objectId":
+		// For ObjectId, we need to check if it's an object with the right structure
+		// MongoDB ObjectId can be string or actual ObjectId object
+		return fmt.Sprintf("(typeof %s === 'string' && %s.length === 24) || (typeof %s === 'object' && %s !== null)", valueExpr, valueExpr, valueExpr, valueExpr)
+	default:
+		return "true" // fallback for unknown types
 	}
 }

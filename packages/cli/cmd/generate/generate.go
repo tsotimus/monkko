@@ -11,8 +11,8 @@ var debugFlag bool
 
 var Cmd = &cobra.Command{
 	Use:   "generate",
-	Short: "Generate TypeScript types from Monko schemas",
-	Long:  `Scans for *.monko.ts files and generates corresponding TypeScript types.`,
+	Short: "Generate Standard Schema validation functions from Monko schemas",
+	Long:  `Scans for *.monko.ts files and generates corresponding Standard Schema validation functions.`,
 	RunE:  runGenerate,
 }
 
@@ -61,9 +61,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	err = GenerateTypes(schemas, config.OutputDir, debugFlag)
 	if err != nil {
-		return fmt.Errorf("failed to generate types: %w", err)
+		return fmt.Errorf("failed to generate schemas: %w", err)
 	}
 
-	fmt.Printf("✅ Generated types for %d schema(s)\n", len(schemas))
+	fmt.Printf("✅ Generated Standard Schema validation functions for %d schema(s)\n", len(schemas))
 	return nil
 }

@@ -1,0 +1,151 @@
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type { ObjectId } from 'mongodb';
+
+// Type definitions (for inference)
+export type {{.Name}}Document = {
+  _id: ObjectId;{{range $fieldName, $field := .Fields}}
+  {{$fieldName}}{{if not $field.Required}}?{{end}}: {{typeScriptType $field.Type}};{{end}}{{if .Options.Timestamps}}
+  createdAt: Date;
+  updatedAt: Date;{{end}}
+}
+
+export type Create{{.Name}}Input = Omit<{{.Name}}Document, '_id'{{if .Options.Timestamps}} | 'createdAt' | 'updatedAt'{{end}}>;
+
+export type Update{{.Name}}Input = Partial<Create{{.Name}}Input>;
+
+// Standard Schema generators
+export function {{.Name}}Schema(): StandardSchemaV1<{{.Name}}Document> {
+  return {
+    '~standard': {
+      version: 1,
+      vendor: 'monko',
+      validate(value: unknown) {
+        const errors: Array<{ message: string; path?: Array<PropertyKey> }> = [];
+        
+        if (typeof value !== 'object' || value === null) {
+          return { issues: [{ message: 'Expected an object' }] };
+        }
+        
+        const obj = value as Record<string, unknown>;
+        
+        // Validate _id
+        if (!obj._id || typeof obj._id !== 'object') {
+          errors.push({ message: 'Invalid _id', path: ['_id'] });
+        }
+        
+        {{range $fieldName, $field := .Fields}}
+        // Validate {{$fieldName}}
+        {{if $field.Required}}
+        if (obj.{{$fieldName}} === undefined) {
+          errors.push({ message: 'Field {{$fieldName}} is required', path: ['{{$fieldName}}'] });
+        } else if (!{{generateValidator $field.Type (printf "obj.%s" $fieldName)}}) {
+          errors.push({ message: 'Invalid type for {{$fieldName}}', path: ['{{$fieldName}}'] });
+        }
+        {{else}}
+        if (obj.{{$fieldName}} !== undefined && !{{generateValidator $field.Type (printf "obj.%s" $fieldName)}}) {
+          errors.push({ message: 'Invalid type for {{$fieldName}}', path: ['{{$fieldName}}'] });
+        }
+        {{end}}
+        {{end}}
+        
+        {{if .Options.Timestamps}}
+        // Validate timestamps
+        if (!obj.createdAt || !(obj.createdAt instanceof Date)) {
+          errors.push({ message: 'Invalid createdAt', path: ['createdAt'] });
+        }
+        if (!obj.updatedAt || !(obj.updatedAt instanceof Date)) {
+          errors.push({ message: 'Invalid updatedAt', path: ['updatedAt'] });
+        }
+        {{end}}
+        
+        if (errors.length > 0) {
+          return { issues: errors };
+        }
+        
+        return { value: obj as {{.Name}}Document };
+      },
+      types: {
+        input: {} as {{.Name}}Document,
+        output: {} as {{.Name}}Document
+      }
+    }
+  };
+}
+
+export function Create{{.Name}}Schema(): StandardSchemaV1<Create{{.Name}}Input> {
+  return {
+    '~standard': {
+      version: 1,
+      vendor: 'monko',
+      validate(value: unknown) {
+        const errors: Array<{ message: string; path?: Array<PropertyKey> }> = [];
+        
+        if (typeof value !== 'object' || value === null) {
+          return { issues: [{ message: 'Expected an object' }] };
+        }
+        
+        const obj = value as Record<string, unknown>;
+        
+        {{range $fieldName, $field := .Fields}}
+        // Validate {{$fieldName}}
+        {{if $field.Required}}
+        if (obj.{{$fieldName}} === undefined) {
+          errors.push({ message: 'Field {{$fieldName}} is required', path: ['{{$fieldName}}'] });
+        } else if (!{{generateValidator $field.Type (printf "obj.%s" $fieldName)}}) {
+          errors.push({ message: 'Invalid type for {{$fieldName}}', path: ['{{$fieldName}}'] });
+        }
+        {{else}}
+        if (obj.{{$fieldName}} !== undefined && !{{generateValidator $field.Type (printf "obj.%s" $fieldName)}}) {
+          errors.push({ message: 'Invalid type for {{$fieldName}}', path: ['{{$fieldName}}'] });
+        }
+        {{end}}
+        {{end}}
+        
+        if (errors.length > 0) {
+          return { issues: errors };
+        }
+        
+        return { value: obj as Create{{.Name}}Input };
+      },
+      types: {
+        input: {} as Create{{.Name}}Input,
+        output: {} as Create{{.Name}}Input
+      }
+    }
+  };
+}
+
+export function Update{{.Name}}Schema(): StandardSchemaV1<Update{{.Name}}Input> {
+  return {
+    '~standard': {
+      version: 1,
+      vendor: 'monko',
+      validate(value: unknown) {
+        const errors: Array<{ message: string; path?: Array<PropertyKey> }> = [];
+        
+        if (typeof value !== 'object' || value === null) {
+          return { issues: [{ message: 'Expected an object' }] };
+        }
+        
+        const obj = value as Record<string, unknown>;
+        
+        {{range $fieldName, $field := .Fields}}
+        // Validate {{$fieldName}} (optional for updates)
+        if (obj.{{$fieldName}} !== undefined && !{{generateValidator $field.Type (printf "obj.%s" $fieldName)}}) {
+          errors.push({ message: 'Invalid type for {{$fieldName}}', path: ['{{$fieldName}}'] });
+        }
+        {{end}}
+        
+        if (errors.length > 0) {
+          return { issues: errors };
+        }
+        
+        return { value: obj as Update{{.Name}}Input };
+      },
+      types: {
+        input: {} as Update{{.Name}}Input,
+        output: {} as Update{{.Name}}Input
+      }
+    }
+  };
+} 
