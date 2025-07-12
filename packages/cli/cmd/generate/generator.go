@@ -11,6 +11,9 @@ import (
 //go:embed templates/schema.tmpl
 var schemaTemplate string
 
+//go:embed templates/utils.tmpl
+var utilsTemplate string
+
 func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 	if debug {
 		fmt.Printf("🔧 Creating output directory: %s\n", outputDir)
@@ -20,6 +23,23 @@ func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 	err := os.MkdirAll(outputDir, 0755)
 	if err != nil {
 		return err
+	}
+
+	// Check if any schema uses ObjectId type
+	needsUtils := false
+	for _, schema := range schemas {
+		if hasObjectIdField(schema) {
+			needsUtils = true
+			break
+		}
+	}
+
+	// Generate utils file if needed
+	if needsUtils {
+		err := generateUtilsFile(outputDir, debug)
+		if err != nil {
+			return fmt.Errorf("failed to generate utils file: %w", err)
+		}
 	}
 
 	// Generate schemas for each schema
@@ -45,9 +65,8 @@ func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 
 func generateSchemaContent(schema Schema) (string, error) {
 	tmpl := template.Must(template.New("schema").Funcs(template.FuncMap{
-		"typeScriptType":    typeScriptType,
-		"generateValidator": generateValidator,
-		"printf":            fmt.Sprintf,
+		"zodType": zodType,
+		"printf":  fmt.Sprintf,
 	}).Parse(schemaTemplate))
 
 	var result strings.Builder
@@ -59,38 +78,56 @@ func generateSchemaContent(schema Schema) (string, error) {
 	return result.String(), nil
 }
 
-func typeScriptType(schemaType string) string {
+func zodType(schemaType string, required bool) string {
+	var zodSchema string
+
 	switch schemaType {
 	case "string":
-		return "string"
+		zodSchema = "z.string()"
 	case "number":
-		return "number"
+		zodSchema = "z.number()"
 	case "boolean":
-		return "boolean"
+		zodSchema = "z.boolean()"
 	case "date":
-		return "Date"
+		zodSchema = "z.date()"
 	case "objectId":
-		return "ObjectId"
+		zodSchema = "ObjectIdSchema"
 	default:
-		return "any"
+		zodSchema = "z.any()"
 	}
+
+	if !required {
+		zodSchema += ".optional()"
+	}
+
+	return zodSchema
 }
 
-func generateValidator(schemaType string, valueExpr string) string {
-	switch schemaType {
-	case "string":
-		return fmt.Sprintf("typeof %s === 'string'", valueExpr)
-	case "number":
-		return fmt.Sprintf("typeof %s === 'number'", valueExpr)
-	case "boolean":
-		return fmt.Sprintf("typeof %s === 'boolean'", valueExpr)
-	case "date":
-		return fmt.Sprintf("%s instanceof Date", valueExpr)
-	case "objectId":
-		// For ObjectId, we need to check if it's an object with the right structure
-		// MongoDB ObjectId can be string or actual ObjectId object
-		return fmt.Sprintf("(typeof %s === 'string' && %s.length === 24) || (typeof %s === 'object' && %s !== null)", valueExpr, valueExpr, valueExpr, valueExpr)
-	default:
-		return "true" // fallback for unknown types
+// hasObjectIdField checks if a schema has any fields with ObjectId type
+func hasObjectIdField(schema Schema) bool {
+	for _, field := range schema.Fields {
+		if field.Type == "objectId" {
+			return true
+		}
 	}
+	return false
 }
+
+// generateUtilsFile generates the shared utils file with ObjectIdSchema
+func generateUtilsFile(outputDir string, debug bool) error {
+	filename := fmt.Sprintf("%s/utils.ts", outputDir)
+
+	err := os.WriteFile(filename, []byte(utilsTemplate), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write utils file %s: %w", filename, err)
+	}
+
+	if debug {
+		fmt.Printf("  📝 %s\n", filename)
+	}
+
+	return nil
+}
+
+// Note: Removed typeScriptType() and generateValidator() functions
+// as they are no longer needed with Zod schema generation

@@ -21,10 +21,11 @@
   "author": "Monko Team",
   "license": "MIT",
   "dependencies": {
+    "@monko/orm": "workspace:*",
+    "@standard-schema/spec": "^1.0.0",
     "diff": "^5.1.0",
     "glob": "^10.3.0",
-    "mongodb": "^6.16.0",
-    "@monko/orm": "workspace:*"
+    "mongodb": "^6.16.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

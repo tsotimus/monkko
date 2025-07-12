@@ -4,7 +4,7 @@
   "private": true,
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index/index.js",
       "types": "./dist/index.d.ts"
     },
     "./config": {
@@ -22,6 +22,10 @@
     "./schemas": {
       "import": "./dist/schemas/index.js",
       "types": "./dist/schemas/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
     }
   },
   "scripts": {

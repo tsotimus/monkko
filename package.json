@@ -11,10 +11,14 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
   },
+  "peerDependencies": {
+    "zod": "^3.25.0 || ^4.0.0"
+  },
   "devDependencies": {
     "prettier": "^3.5.3",
     "turbo": "^2.5.2",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "zod": "^3.25.0 || ^4.0.0"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
