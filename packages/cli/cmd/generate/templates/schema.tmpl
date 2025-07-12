@@ -23,10 +23,3 @@ export const Update{{.Name}}Schema = Create{{.Name}}Schema.partial();
 export type {{.Name}}Document = z.infer<typeof {{.Name}}Schema>;
 export type Create{{.Name}}Input = z.infer<typeof Create{{.Name}}Schema>;
 export type Update{{.Name}}Input = z.infer<typeof Update{{.Name}}Schema>;
-
-// Export schemas for external use
-export const {{.Name}}Schemas = {
-  document: {{.Name}}Schema,
-  create: Create{{.Name}}Schema,
-  update: Update{{.Name}}Schema,
-} as const; 
