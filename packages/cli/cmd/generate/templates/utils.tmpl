@@ -5,5 +5,5 @@ import { isObjectId } from '@monko/orm/utils';
 export const ObjectIdSchema = z.string().refine((val) => {
   return isObjectId(val);
 }, {
-  message: "Invalid ObjectId format"
+  message: "Invalid ObjectId"
 }); 
