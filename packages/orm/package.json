@@ -4,51 +4,28 @@
   "private": true,
   "exports": {
     ".": {
-      "import": "./dist/index/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
     },
-    "./config": {
-      "import": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts"
-    },
-    "./connections": {
-      "import": "./dist/connections/index.js",
-      "types": "./dist/connections/index.d.ts"
-    },
-    "./models": {
-      "import": "./dist/models/index.js",
-      "types": "./dist/models/index.d.ts"
-    },
-    "./schemas": {
-      "import": "./dist/schemas/index.js",
-      "types": "./dist/schemas/index.d.ts"
-    },
-    "./utils": {
-      "import": "./dist/utils/index.js",
-      "types": "./dist/utils/index.d.ts"
+    "./*": {
+      "import": "./dist/*/index.mjs",
+      "types": "./dist/*/index.d.mts"
     }
   },
   "scripts": {
-    "dev": "npm run generate-exports && rollup -c --watch",
+    "dev": "tsup --watch",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "build": "npm run generate-exports && rollup -c",
-    "generate-exports": "node scripts/generate-exports.mjs"
+    "build": "tsup"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
     "eslint": "^9.25.0",
-    "fast-glob": "^3.3.3",
-    "rollup": "^4.40.2",
-    "rollup-plugin-dts": "^6.2.1",
-    "rollup-plugin-terser": "^7.0.2",
+    "mongodb": "^6.16.0",
     "tslib": "^2.8.1",
-    "typescript": "5.8.2",
-    "mongodb": "^6.16.0"
+    "tsup": "^8.5.0",
+    "typescript": "5.8.2"
   },
   "peerDependencies": {
     "mongodb": "^6.16.0"
