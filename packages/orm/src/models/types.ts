@@ -1,0 +1,58 @@
+import type { DeleteResult, Filter, InsertOneResult, OptionalUnlessRequiredId, UpdateFilter, UpdateResult, WithId } from "mongodb";
+
+// Populate types
+export interface PopulateOptions {
+  strategy?: 'multiple' | 'aggregation';
+}
+
+// Type utilities for population - handles explicit generic approach
+type PopulatedDocument<Doc, PopulatedFields extends Record<string, unknown>> = Omit<Doc, keyof PopulatedFields> & PopulatedFields;
+
+// QueryBuilder that's directly awaitable and supports type-safe populate
+export interface QueryBuilder<Doc, Populated extends Record<string, unknown> = Record<string, never>> extends PromiseLike<WithId<PopulatedDocument<Doc, Populated>>[]> {
+  populate<T = unknown>(
+    field: keyof Doc, 
+    options?: PopulateOptions
+  ): QueryBuilder<Doc, Populated & { [K in keyof Doc]: T }>;
+  
+  populate<T = unknown>(
+    fields: (keyof Doc)[], 
+    options?: PopulateOptions
+  ): QueryBuilder<Doc, Populated & { [K in keyof Doc]: T }>;
+  
+  // Make it thenable (awaitable)
+  then<TResult1 = WithId<PopulatedDocument<Doc, Populated>>[], TResult2 = never>(
+    onfulfilled?: ((value: WithId<PopulatedDocument<Doc, Populated>>[]) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null
+  ): PromiseLike<TResult1 | TResult2>;
+
+  // Keep exec() as optional for backward compatibility
+  exec(): Promise<WithId<PopulatedDocument<Doc, Populated>>[]>;
+}
+
+export interface SingleQueryBuilder<Doc, Populated extends Record<string, unknown> = Record<string, never>> extends PromiseLike<WithId<PopulatedDocument<Doc, Populated>> | null> {
+  populate<T = unknown>(
+    field: keyof Doc, 
+    options?: PopulateOptions
+  ): SingleQueryBuilder<Doc, Populated & { [K in keyof Doc]: T }>;
+  
+  populate<T = unknown>(
+    fields: (keyof Doc)[], 
+    options?: PopulateOptions
+  ): SingleQueryBuilder<Doc, Populated & { [K in keyof Doc]: T }>;
+  
+  // Make it thenable (awaitable)
+  then<TResult1 = WithId<PopulatedDocument<Doc, Populated>> | null, TResult2 = never>(
+    onfulfilled?: ((value: WithId<PopulatedDocument<Doc, Populated>> | null) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null
+  ): PromiseLike<TResult1 | TResult2>;
+
+}
+
+export interface Model<Doc> {
+  find(filter?: Filter<Doc>): QueryBuilder<Doc>;
+  findOne(filter: Filter<Doc>): SingleQueryBuilder<Doc>;
+  create(doc: OptionalUnlessRequiredId<Doc>): Promise<InsertOneResult<Doc>>;
+  update(filter: Filter<Doc>, update: UpdateFilter<Doc>): Promise<UpdateResult>;
+  delete(filter: Filter<Doc>): Promise<DeleteResult>;
+} 

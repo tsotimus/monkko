@@ -1,6 +1,5 @@
 ---
 description: 
 globs: packages/cli/**
-alwaysApply: false
 ---
 Read this [README.md](mdc:packages/kit/README.md) so you can understand what we are trying to accomplish in this package

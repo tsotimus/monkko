@@ -1,6 +1,5 @@
 ---
 description: 
 globs: packages/orm/**
-alwaysApply: false
 ---
 Read the [README.md](mdc:packages/orm/README.md) for context about what we are trying to create

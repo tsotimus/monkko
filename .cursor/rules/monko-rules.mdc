@@ -1,0 +1,7 @@
+---
+globs: packages/orm/**
+---
+# Rules
+
+- Never use `any` type.
+- Avoid type assertions.
