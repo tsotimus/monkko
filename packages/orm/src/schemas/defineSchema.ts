@@ -14,10 +14,10 @@ export interface SchemaDefinition {
   /** An object defining the fields of the schema. Keys are field names. */
   fields: Record<string, MonkoField>;
   /** Optional settings for schema. */
-  options?: {
-    /** Automatically add and manage createdAt and updatedAt timestamps */
-    timestamps?: boolean;
-  };
+  // options?: {
+  //   /** Automatically add and manage createdAt and updatedAt timestamps */
+  //   timestamps?: boolean;
+  // };
   
 
   // TODO: Add more properties here

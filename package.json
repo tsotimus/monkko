@@ -5,6 +5,7 @@
     "c:build": "turbo run build --filter=@monko/cli",
     "c:test": "turbo run test --filter=@monko/cli-testing",
     "p:build": "turbo run build --filter=@monko/orm",
+    "n:generate": "turbo run generate --filter=@monko/next",
     "build": "turbo run build",
     "dev": "turbo run dev --filter=@monko/orm --filter=@monko/next",
     "lint": "turbo run lint",
