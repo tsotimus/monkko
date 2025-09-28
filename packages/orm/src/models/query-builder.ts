@@ -2,7 +2,13 @@ import type { SchemaDefinition } from "../schemas/defineSchema";
 import type { MonkoClient } from "../connections/createConnection";
 import type { Filter, WithId, Collection, Document } from "mongodb";
 import { ObjectId } from "mongodb";
-import type { PopulateOptions } from "./types";
+import type {
+  PopulateOptions,
+  QueryBuilder,
+  SingleQueryBuilder,
+  Populate,
+  Prettify,
+} from "./types";
 import type { ObjectIdField } from "../schemas/fields/field-types/objectId";
 
 // Internal populate info
@@ -18,75 +24,131 @@ export function registerSchema(schema: SchemaDefinition) {
   schemaRegistry.set(schema.name, schema);
 }
 
-export function createQueryBuilder<Doc extends Document>(
-  collection: Collection<Doc>,
-  schema: SchemaDefinition,
-  monkoClient: MonkoClient,
-  filter: Filter<Doc>,
-  isArray: boolean = true
-) {
-  const populates: PopulateInfo[] = [];
+abstract class QueryBuilderBase<Doc extends Document, TReturn>
+  implements PromiseLike<TReturn>
+{
+  protected populates: PopulateInfo[] = [];
 
-  const executeQuery = async (): Promise<WithId<Doc>[] | WithId<Doc> | null> => {
-    // Get the base documents first
-    const docs = isArray 
-      ? await collection.find(filter || {}).toArray()
-      : await collection.findOne(filter);
+  constructor(
+    protected collection: Collection<Doc>,
+    protected schema: SchemaDefinition,
+    protected monkoClient: MonkoClient,
+    protected filter: Filter<Doc>,
+  ) {}
+
+  protected _populate(field: string, options: PopulateOptions = {}) {
+    const fieldArray = [field];
+
+    const totalFields =
+      this.populates.reduce((acc, p) => acc + p.fields.length, 0) +
+      fieldArray.length;
+    const defaultStrategy = totalFields >= 2 ? "aggregation" : "multiple";
+
+    this.populates.push({
+      fields: fieldArray,
+      options: { strategy: defaultStrategy, ...options },
+    });
+
+    return this;
+  }
+
+  protected abstract executeQuery(): Promise<TReturn>;
+
+  then<TResult1 = TReturn, TResult2 = never>(
+    onfulfilled?:
+      | ((value: TReturn) => TResult1 | PromiseLike<TResult1>)
+      | null,
+    onrejected?:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+      | null,
+  ): Promise<TResult1 | TResult2> {
+    return this.executeQuery().then(onfulfilled, onrejected);
+  }
+}
+
+export class QueryBuilderImpl<Doc extends Document>
+  extends QueryBuilderBase<Doc, WithId<Doc>[]>
+  implements QueryBuilder<Doc>
+{
+  populate<T, K extends keyof Doc>(
+    field: K,
+    options: PopulateOptions = {},
+  ): QueryBuilder<Prettify<Populate<Doc, K, T>>> {
+    this._populate(field as string, options);
+    return this as unknown as QueryBuilder<Prettify<Populate<Doc, K, T>>>;
+  }
+
+  protected async executeQuery(): Promise<WithId<Doc>[]> {
+    const docs = await this.collection.find(this.filter || {}).toArray();
 
     if (!docs || (Array.isArray(docs) && docs.length === 0)) {
-      return docs;
+      return docs as WithId<Doc>[];
     }
 
     // Process populates
     const documentsToProcess = Array.isArray(docs) ? docs : [docs];
-    
-    for (const populateInfo of populates) {
+
+    for (const populateInfo of this.populates) {
       // For now, we'll implement only the multiple queries strategy
-      if (populateInfo.options.strategy === 'multiple' || populateInfo.options.strategy === undefined) {
+      if (
+        populateInfo.options.strategy === "multiple" ||
+        populateInfo.options.strategy === undefined
+      ) {
         await executePopulateWithMultipleQueries(
-          documentsToProcess, 
-          populateInfo, 
-          schema, 
-          monkoClient
+          documentsToProcess as WithId<Doc>[],
+          populateInfo,
+          this.schema,
+          this.monkoClient,
         );
       }
       // TODO: Add aggregation strategy implementation
     }
 
-    return docs;
-  };
+    return docs as WithId<Doc>[];
+  }
+}
 
-  const builder = {
-    populate(fields: string | string[], options: PopulateOptions = {}) {
-      const fieldArray = Array.isArray(fields) ? fields : [fields];
-      
-      // Default strategy based on total field count across all populate calls
-      const totalFields = populates.reduce((acc, p) => acc + p.fields.length, 0) + fieldArray.length;
-      const defaultStrategy = totalFields >= 2 ? 'aggregation' : 'multiple';
-      
-      populates.push({
-        fields: fieldArray,
-        options: { strategy: defaultStrategy, ...options }
-      });
-      
-      return builder;
-    },
+export class SingleQueryBuilderImpl<Doc extends Document>
+  extends QueryBuilderBase<Doc, WithId<Doc> | null>
+  implements SingleQueryBuilder<Doc>
+{
+  populate<T, K extends keyof Doc>(
+    field: K,
+    options: PopulateOptions = {},
+  ): SingleQueryBuilder<Prettify<Populate<Doc, K, T>>> {
+    this._populate(field as string, options);
+    return this as unknown as SingleQueryBuilder<Prettify<Populate<Doc, K, T>>>;
+  }
 
-    // Keep exec() for backward compatibility
-    async exec(): Promise<WithId<Doc>[] | WithId<Doc> | null> {
-      return executeQuery();
-    },
+  protected async executeQuery(): Promise<WithId<Doc> | null> {
+    const doc = await this.collection.findOne(this.filter);
 
-    // Make it thenable (awaitable)
-    then<TResult1 = WithId<Doc>[] | WithId<Doc> | null, TResult2 = never>(
-      onfulfilled?: ((value: WithId<Doc>[] | WithId<Doc> | null) => TResult1 | PromiseLike<TResult1>) | undefined | null,
-      onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null
-    ): PromiseLike<TResult1 | TResult2> {
-      return executeQuery().then(onfulfilled, onrejected);
+    if (!doc) {
+      return null;
     }
-  };
 
-  return builder;
+    // Process populates
+    const documentsToProcess = [doc];
+
+    for (const populateInfo of this.populates) {
+      // For now, we'll implement only the multiple queries strategy
+      if (
+        populateInfo.options.strategy === "multiple" ||
+        populateInfo.options.strategy === undefined
+      ) {
+        await executePopulateWithMultipleQueries(
+          documentsToProcess as WithId<Doc>[],
+          populateInfo,
+          this.schema,
+          this.monkoClient,
+        );
+      }
+      // TODO: Add aggregation strategy implementation
+    }
+
+    return doc as WithId<Doc> | null;
+  }
 }
 
 async function executePopulateWithMultipleQueries<Doc>(

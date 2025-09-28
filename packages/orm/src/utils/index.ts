@@ -8,3 +8,16 @@ import { ObjectId } from "mongodb";
 export const isObjectId = (value: string | number | ObjectId | Uint8Array): boolean => {
     return ObjectId.isValid(value);
 }
+
+/**
+ * Convert a string to ObjectId if it's a valid ObjectId string.
+ * @param value - The string value to convert to ObjectId
+ * @returns ObjectId if valid string
+ * @throws Error if the string is not a valid ObjectId
+ */
+export const toObjectId = (value: string): ObjectId => {
+    if (!ObjectId.isValid(value)) {
+        throw new Error(`Invalid ObjectId string: ${value}`);
+    }
+    return new ObjectId(value);
+}

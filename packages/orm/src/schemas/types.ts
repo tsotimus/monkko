@@ -18,6 +18,7 @@ export type BaseField = {
     required?: boolean;
     optional?: boolean;
     unique?: boolean;
+    transform?: (value: string) => unknown;
 }
 
 export interface ObjectFieldProps<T extends Record<string, MonkoField>> extends BaseField {
@@ -27,7 +28,7 @@ export interface ObjectField<T extends Record<string, MonkoField>> extends Objec
     type: 'object';
 }
 
-export type MonkoField = StringField | NumberField | BooleanField | DateField | ObjectIdField | ObjectField<any>;
+export type MonkoField = StringField | NumberField | BooleanField | DateField | ObjectIdField | ObjectField<Record<string, MonkoField>>;
 
 /**
  * Infers the actual TypeScript type (
