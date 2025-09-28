@@ -8,6 +8,7 @@ import type {
   SingleQueryBuilder,
   Populate,
   Prettify,
+  JSONSerialized,
 } from "./types";
 import type { ObjectIdField } from "../schemas/fields/field-types/objectId";
 
@@ -34,6 +35,7 @@ abstract class QueryBuilderBase<Doc extends Document, TReturn>
     protected schema: SchemaDefinition,
     protected monkoClient: MonkoClient,
     protected filter: Filter<Doc>,
+    protected toJSONFunc: (doc: WithId<Doc>) => Prettify<JSONSerialized<WithId<Doc>>>,
   ) {}
 
   protected _populate(field: string, options: PopulateOptions = {}) {
@@ -79,6 +81,11 @@ export class QueryBuilderImpl<Doc extends Document>
     return this as unknown as QueryBuilder<Prettify<Populate<Doc, K, T>>>;
   }
 
+  async toJSON() {
+    const docs = await this.executeQuery();
+    return docs.map(this.toJSONFunc);
+  }
+
   protected async executeQuery(): Promise<WithId<Doc>[]> {
     const docs = await this.collection.find(this.filter || {}).toArray();
 
@@ -119,6 +126,12 @@ export class SingleQueryBuilderImpl<Doc extends Document>
   ): SingleQueryBuilder<Prettify<Populate<Doc, K, T>>> {
     this._populate(field as string, options);
     return this as unknown as SingleQueryBuilder<Prettify<Populate<Doc, K, T>>>;
+  }
+
+  async toJSON() {
+    const doc = await this.executeQuery();
+    if (!doc) return null;
+    return this.toJSONFunc(doc);
   }
 
   protected async executeQuery(): Promise<WithId<Doc> | null> {

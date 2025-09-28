@@ -21,9 +21,19 @@ export function createModel<
   // Register the schema for populate functionality
   registerSchema(schema);
 
+  const toJSON = (doc: WithId<Doc>) => {
+    return JSON.parse(JSON.stringify(doc));
+  };
+
   return {
     find(filter: Filter<Doc> = {}): QueryBuilder<Doc> {
-      return new QueryBuilderImpl<Doc>(coll, schema, monkoClient, filter);
+      return new QueryBuilderImpl<Doc>(
+        coll,
+        schema,
+        monkoClient,
+        filter,
+        toJSON,
+      );
     },
 
     findOne(filter: Filter<Doc>): SingleQueryBuilder<Doc> {
@@ -32,6 +42,7 @@ export function createModel<
         schema,
         monkoClient,
         filter,
+        toJSON,
       );
     },
 
@@ -68,8 +79,6 @@ export function createModel<
       return coll.deleteOne(filter);
     },
 
-    toJSON(doc: WithId<Doc>) {
-      return JSON.parse(JSON.stringify(doc));
-    },
+    toJSON,
   };
 }

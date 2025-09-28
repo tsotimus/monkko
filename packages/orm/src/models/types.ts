@@ -59,6 +59,8 @@ export interface QueryBuilder<Doc> extends PromiseLike<WithId<Doc>[]> {
       | undefined
       | null,
   ): PromiseLike<TResult1 | TResult2>;
+
+  toJSON(): Promise<Prettify<JSONSerialized<WithId<Doc>>>[]>;
 }
 
 export interface SingleQueryBuilder<Doc>
@@ -79,6 +81,8 @@ export interface SingleQueryBuilder<Doc>
       | undefined
       | null,
   ): PromiseLike<TResult1 | TResult2>;
+
+  toJSON(): Promise<Prettify<JSONSerialized<WithId<Doc>>> | null>;
 }
 
 /**
