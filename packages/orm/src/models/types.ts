@@ -5,6 +5,7 @@ import type {
   InsertOneResult,
   UpdateResult,
   DeleteResult,
+  ObjectId,
 } from "mongodb";
 
 /**
@@ -80,10 +81,31 @@ export interface SingleQueryBuilder<Doc>
   ): PromiseLike<TResult1 | TResult2>;
 }
 
+/**
+ * Serializes a document type for JSON transport.
+ * It converts types like ObjectId and Date to strings.
+ */
+type Primitives = string | number | boolean | null | undefined;
+
+export type JSONSerialized<T> = T extends Primitives
+  ? T
+  : T extends ObjectId
+  ? string
+  : T extends Date
+  ? string
+  : T extends (infer U)[]
+  ? JSONSerialized<U>[]
+  : T extends ReadonlyArray<infer U>
+  ? ReadonlyArray<JSONSerialized<U>>
+  : T extends object
+  ? { [K in keyof T]: JSONSerialized<T[K]> }
+  : T;
+
 export interface Model<Doc> {
   find(filter?: Filter<Doc>): QueryBuilder<Doc>;
   findOne(filter: Filter<Doc>): SingleQueryBuilder<Doc>;
   create(doc: CreateDocument<Doc>): Promise<InsertOneResult<Doc>>;
   update(filter: Filter<Doc>, update: UpdateFilter<Doc>): Promise<UpdateResult>;
   delete(filter: Filter<Doc>): Promise<DeleteResult>;
+  toJSON(doc: WithId<Doc>): Prettify<JSONSerialized<WithId<Doc>>>;
 } 
