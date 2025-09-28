@@ -3,25 +3,28 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Building2 } from "lucide-react";
-import type { UserDocument } from "@/models/User";
+import type { UserDocument, UserDocumentPopulated } from "@/models/User";
 import type { OrganisationDocument } from "@/models/Organisation";
+import { JSONSerialized } from "@monko/orm";
 
 // Type for user with populated organisation
-type UserWithPopulatedOrg = Omit<UserDocument, 'organisationId'> & {
-  organisationId?: OrganisationDocument;
-};
+type UserWithPopulatedOrg = JSONSerialized<UserDocumentPopulated>;
 
 // Type for user with non-populated organisation (just ID)
-type UserWithOrgId = Omit<UserDocument, 'organisationId'> & {
-  organisationId?: string;
-};
+type UserWithOrgId = JSONSerialized<UserDocument>;
 
-interface UserCardProps {
-  user: UserDocument | UserWithPopulatedOrg | UserWithOrgId;
-  showPopulated?: boolean;
-}
+type UserCardProps =
+  | {
+      user: UserWithPopulatedOrg;
+      showPopulated: true;
+    }
+  | {
+      user: UserWithOrgId;
+      showPopulated: false | undefined;
+    };
 
-export function UserCard({ user, showPopulated = false }: UserCardProps) {
+export function UserCard(props: UserCardProps) {
+  const { user } = props;
   return (
     <Card className="p-4">
       <div className="flex items-center gap-4 mb-4">
@@ -38,10 +41,10 @@ export function UserCard({ user, showPopulated = false }: UserCardProps) {
       
       <Separator className="my-3" />
       
-      {showPopulated ? (
-        <PopulatedOrganisation organisationId={user.organisationId as OrganisationDocument} />
+      {props.showPopulated ? (
+        <PopulatedOrganisation organisationId={props.user.organisationId} />
       ) : (
-        <RawOrganisationId organisationId={user.organisationId as string} />
+        <RawOrganisationId organisationId={props.user.organisationId} />
       )}
     </Card>
   );
@@ -60,7 +63,7 @@ function RawOrganisationId({ organisationId }: { organisationId?: string }) {
   );
 }
 
-function PopulatedOrganisation({ organisationId }: { organisationId?: OrganisationDocument }) {
+function PopulatedOrganisation({ organisationId }: { organisationId?: JSONSerialized<OrganisationDocument> }) {
   if (!organisationId) {
     return (
       <div className="text-center py-8 text-muted-foreground">

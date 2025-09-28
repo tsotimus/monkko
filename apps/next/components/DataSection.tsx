@@ -2,36 +2,35 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Database, Link } from "lucide-react";
 import { UserCard } from "./UserCard";
-import type { UserDocument } from "@/models/User";
-import type { OrganisationDocument } from "@/models/Organisation";
+import type { UserDocument, UserDocumentPopulated } from "@/models/User";
+import { JSONSerialized } from "@monko/orm";
+// import type { OrganisationDocument } from "@/models/Organisation";
 
-// Type for user with populated organisation
-type UserWithPopulatedOrg = Omit<UserDocument, 'organisationId'> & {
-  organisationId?: OrganisationDocument;
-};
+type DataSectionProps =
+  | {
+      showPopulated: true;
+      users: JSONSerialized<UserDocumentPopulated>[];
+    }
+  | {
+      showPopulated: false;
+      users: JSONSerialized<UserDocument>[];
+    };
 
-// Type for user with non-populated organisation (just ID)
-type UserWithOrgId = Omit<UserDocument, 'organisationId'> & {
-  organisationId?: string;
-};
-
-interface DataSectionProps {
+interface DataSectionSharedProps {
   title: string;
   description: string;
-  users: (UserDocument | UserWithPopulatedOrg | UserWithOrgId)[];
-  showPopulated: boolean;
   badgeText: string;
   badgeVariant?: "default" | "outline";
 }
 
-export function DataSection({ 
-  title, 
-  description, 
-  users, 
-  showPopulated, 
-  badgeText, 
-  badgeVariant = "outline" 
-}: DataSectionProps) {
+export function DataSection({
+  title,
+  description,
+  users,
+  showPopulated,
+  badgeText,
+  badgeVariant = "outline",
+}: DataSectionSharedProps & DataSectionProps) {
   const Icon = showPopulated ? Link : Database;
 
   return (
@@ -50,13 +49,21 @@ export function DataSection({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {users.map((user) => (
-          <UserCard 
-            key={user._id.toString()} 
-            user={user} 
-            showPopulated={showPopulated}
-          />
-        ))}
+        {showPopulated
+          ? users.map((user) => (
+              <UserCard
+                key={user._id.toString()}
+                user={user as JSONSerialized<UserDocumentPopulated>}
+                showPopulated={true}
+              />
+            ))
+          : users.map((user) => (
+              <UserCard
+                key={user._id.toString()}
+                user={user as JSONSerialized<UserDocument>}
+                showPopulated={false}
+              />
+            ))}
       </CardContent>
     </Card>
   );
