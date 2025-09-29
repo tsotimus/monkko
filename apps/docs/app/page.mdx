@@ -1,0 +1,191 @@
+---
+asIndexPage: true
+description: The TypeScript-first MongoDB ORM that doesn't compromise on performance. Built for modern applications with full type safety and blazing-fast code generation.
+---
+
+import { Callout } from 'nextra/components'
+
+# Monko
+
+<Hero />
+
+export function Hero() {
+  return (
+    <div className="text-center my-12">
+      <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-6">
+        Monko
+      </h1>
+      <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+        The TypeScript-first MongoDB ORM that doesn't compromise on performance. 
+        Built for modern applications with full type safety and blazing-fast code generation.
+      </p>
+    </div>
+  )
+}
+
+## Quick Example
+
+Here's what working with Monko looks like:
+
+```typescript
+// Define your schema with full TypeScript support
+export const User = defineSchema({
+  name: "User",
+  db: "myapp",
+  collection: "users",
+  fields: {
+    name: fields.string({ required: true }),
+    email: fields.string({ required: true, unique: true }),
+    organisation: fields.reference("Organisation", { optional: true })
+  }
+});
+
+// Get fully typed models with populate support
+const users = await userModel
+  .find({ name: { $regex: /john/i } })
+  .populate("organisation") // ← Automatically typed!
+  .toJSON();
+```
+
+<Callout type="info">
+The populate API automatically changes the return type based on whether populate is called. No more `any` types!
+</Callout>
+
+## Why Monko?
+
+### ⚡ Lightning Fast
+Go-powered CLI generates TypeScript types in **under 100ms**. No more waiting for slow build processes.
+
+### 🔒 Type Safe
+Full TypeScript support with automatic type inference. Catch errors at compile time, not runtime.
+
+### 🎯 Intuitive API
+Familiar Mongoose-like API with modern TypeScript patterns. Easy migration path for existing projects.
+
+### 🔗 Type-Safe Relations
+- Populate with automatic type inference
+- Reference validation at compile time  
+- No more `any` types in populated documents
+- Generic fallback: `.populate<OrganisationDocument>("organisation")`
+
+### 🏗️ Production Ready
+- Multiple database connection support
+- Built-in validation with Zod
+- Migration and schema management
+- Comprehensive error handling
+
+## Quick Start
+
+<div className="steps-container">
+
+### Install Monko
+
+```bash
+npm install @monko/orm @monko/cli
+```
+
+### Initialize Project
+
+```bash
+npx monko init
+```
+
+### Define Schema
+
+```typescript filename="schemas/User.monko.ts"
+import { defineSchema, fields } from "@monko/orm/schemas";
+
+export const User = defineSchema({
+  name: "User",
+  db: "myapp",  
+  collection: "users",
+  fields: {
+    name: fields.string({ required: true }),
+    email: fields.string({ required: true, unique: true }),
+    createdAt: fields.date({ default: () => new Date() })
+  }
+});
+```
+
+### Generate Types
+
+```bash
+npx monko generate
+```
+
+### Use Your Model
+
+```typescript
+import { createModel } from "@monko/orm/models";
+import { User } from "./schemas/User.monko";
+import { mongoClient } from "./db";
+
+const userModel = createModel(User, mongoClient);
+
+// Fully typed operations
+const users = await userModel
+  .find({ name: { $regex: /john/i } })
+  .toJSON();
+```
+
+</div>
+
+## Performance Comparison
+
+| Feature | Monko | Mongoose | Prisma |
+|---------|-------|----------|--------|
+| TypeScript First | ✅ | ⚠️ | ✅ |
+| MongoDB Native | ✅ | ✅ | ❌ |
+| Fast Code Generation | ✅ (under 100ms) | ❌ | ⚠️ |
+| Type-Safe Populate | ✅ | ❌ | ✅ |
+| Multiple DB Support | ✅ | ⚠️ | ✅ |
+
+## Advanced Features
+
+### Sub-documents
+
+```typescript
+export const Address = defineSubDocument({
+  street: fields.string({ required: true }),
+  city: fields.string({ required: true }),
+  state: fields.string({ required: true }),
+  zip: fields.string({ required: true })
+});
+
+export const User = defineSchema({
+  name: "User",
+  fields: {
+    name: fields.string({ required: true }),
+    address: Address({ optional: true }),
+  }
+});
+```
+
+### Type-Safe Population
+
+```typescript
+// Without populate - organisation is ObjectId
+const users = await userModel.find({}).toJSON();
+// users[0].organisationId: ObjectId
+
+// With populate - organisation is full document  
+const usersWithOrg = await userModel
+  .find({})
+  .populate("organisationId")
+  .toJSON();
+// usersWithOrg[0].organisationId: OrganisationDocument
+```
+
+<Callout type="warning">
+Monko is currently in active development. Some features may change before the stable release.
+</Callout>
+
+## Next Steps
+
+Ready to dive deeper? Check out our comprehensive guides:
+
+- [Getting Started](/getting-started) - Complete setup guide
+- [Field Types](/guide/field-types) - Learn about all available field types  
+- [Relationships](/guide/relationships) - Set up relations between documents
+- [CLI Commands](/guide/cli) - Master the Monko CLI
+- [Examples](/examples) - See real-world usage patterns

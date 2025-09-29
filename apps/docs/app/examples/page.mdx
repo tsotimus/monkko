@@ -1,0 +1,389 @@
+---
+title: Monko Examples
+description: Real-world examples of using Monko in various scenarios
+---
+
+import { Callout } from 'nextra/components'
+
+# Examples
+
+Real-world examples of using Monko in various scenarios.
+
+## Basic Blog Application
+
+A simple blog with users, posts, and comments:
+
+### Schema Definitions
+
+```typescript filename="schemas/User.monko.ts"
+import { defineSchema, fields } from "@monko/orm/schemas";
+
+export const User = defineSchema({
+  name: "User",
+  db: "blog",
+  collection: "users",
+  fields: {
+    username: fields.string({ 
+      required: true, 
+      unique: true,
+      minLength: 3,
+      maxLength: 20 
+    }),
+    email: fields.string({ 
+      required: true, 
+      unique: true,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ 
+    }),
+    bio: fields.string({ 
+      required: false,
+      maxLength: 500 
+    }),
+    avatar: fields.string({ required: false }),
+    createdAt: fields.date({ default: () => new Date() }),
+    isActive: fields.boolean({ default: true })
+  }
+});
+```
+
+```typescript filename="schemas/Post.monko.ts"
+import { defineSchema, fields } from "@monko/orm/schemas";
+
+export const Post = defineSchema({
+  name: "Post",
+  db: "blog", 
+  collection: "posts",
+  fields: {
+    title: fields.string({ 
+      required: true,
+      maxLength: 100 
+    }),
+    slug: fields.string({ 
+      required: true,
+      unique: true 
+    }),
+    content: fields.string({ required: true }),
+    excerpt: fields.string({ 
+      required: false,
+      maxLength: 300 
+    }),
+    author: fields.reference("User", { required: true }),
+    tags: fields.array(fields.string(), { 
+      required: false,
+      maxItems: 10 
+    }),
+    published: fields.boolean({ default: false }),
+    publishedAt: fields.date({ required: false }),
+    createdAt: fields.date({ default: () => new Date() }),
+    updatedAt: fields.date({ default: () => new Date() })
+  }
+});
+```
+
+### Usage Examples
+
+```typescript filename="services/blog.ts"
+import { userModel } from "../models/User";
+import { postModel } from "../models/Post";
+import type { UserDocument, PostDocument } from "../types/generated";
+
+// Create a user
+export async function createUser(userData: {
+  username: string;
+  email: string;
+  bio?: string;
+}) {
+  return await userModel.create(userData);
+}
+
+// Create a post with author reference
+export async function createPost(
+  authorId: string,
+  postData: {
+    title: string;
+    content: string;
+    tags?: string[];
+  }
+) {
+  const slug = postData.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+  return await postModel.create({
+    ...postData,
+    slug,
+    author: authorId,
+    published: false
+  });
+}
+
+// Get posts with author information
+export async function getPublishedPosts() {
+  return await postModel
+    .find({ published: true })
+    .populate("author")
+    .sort({ publishedAt: -1 })
+    .toJSON();
+}
+
+// Get user's posts
+export async function getUserPosts(userId: string) {
+  return await postModel
+    .find({ author: userId })
+    .sort({ createdAt: -1 })
+    .toJSON();
+}
+
+// Publish a post
+export async function publishPost(postId: string) {
+  return await postModel.updateOne(
+    { _id: postId },
+    { 
+      $set: { 
+        published: true,
+        publishedAt: new Date(),
+        updatedAt: new Date()
+      } 
+    }
+  );
+}
+```
+
+## E-commerce Application
+
+An e-commerce system with products, orders, and inventory:
+
+### Product Schema
+
+```typescript filename="schemas/Product.monko.ts"
+import { defineSchema, defineSubDocument, fields } from "@monko/orm/schemas";
+
+export const Price = defineSubDocument({
+  amount: fields.number({ required: true, min: 0 }),
+  currency: fields.string({ 
+    required: true,
+    enum: ["USD", "EUR", "GBP"] 
+  })
+});
+
+export const Inventory = defineSubDocument({
+  quantity: fields.number({ 
+    required: true, 
+    min: 0,
+    integer: true 
+  }),
+  reserved: fields.number({ 
+    default: 0,
+    min: 0,
+    integer: true 
+  }),
+  lowStockThreshold: fields.number({ 
+    default: 10,
+    min: 0,
+    integer: true 
+  })
+});
+
+export const Product = defineSchema({
+  name: "Product",
+  db: "ecommerce",
+  collection: "products",
+  fields: {
+    name: fields.string({ required: true }),
+    description: fields.string({ required: true }),
+    sku: fields.string({ required: true, unique: true }),
+    price: Price({ required: true }),
+    inventory: Inventory({ required: true }),
+    category: fields.reference("Category", { required: true }),
+    images: fields.array(fields.string(), { 
+      required: false,
+      maxItems: 10 
+    }),
+    isActive: fields.boolean({ default: true }),
+    createdAt: fields.date({ default: () => new Date() })
+  }
+});
+```
+
+### Order Processing
+
+```typescript filename="services/orders.ts"
+import { orderModel } from "../models/Order";
+import { productModel } from "../models/Product";
+
+export async function createOrder(orderData: {
+  customerId: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+  }>;
+}) {
+  // Validate inventory and calculate total
+  let totalAmount = 0;
+  const validatedItems = [];
+
+  for (const item of orderData.items) {
+    const product = await productModel.findById(item.productId);
+    if (!product) {
+      throw new Error(`Product ${item.productId} not found`);
+    }
+
+    if (product.inventory.quantity < item.quantity) {
+      throw new Error(`Insufficient stock for ${product.name}`);
+    }
+
+    validatedItems.push({
+      product: item.productId,
+      quantity: item.quantity,
+      price: product.price.amount,
+      total: product.price.amount * item.quantity
+    });
+
+    totalAmount += product.price.amount * item.quantity;
+  }
+
+  // Reserve inventory
+  for (const item of orderData.items) {
+    await productModel.updateOne(
+      { _id: item.productId },
+      { 
+        $inc: { 
+          'inventory.reserved': item.quantity 
+        } 
+      }
+    );
+  }
+
+  // Create order
+  return await orderModel.create({
+    customer: orderData.customerId,
+    items: validatedItems,
+    total: totalAmount,
+    status: 'pending',
+    createdAt: new Date()
+  });
+}
+```
+
+<Callout type="info">
+These examples show real-world patterns you'll use in production applications.
+</Callout>
+
+## Advanced Queries
+
+### Complex Filtering and Population
+
+```typescript
+// Find published posts by specific authors with user data
+const posts = await postModel
+  .find({
+    published: true,
+    author: { $in: authorIds },
+    createdAt: { 
+      $gte: new Date('2024-01-01'),
+      $lte: new Date() 
+    },
+    tags: { $in: ['typescript', 'mongodb'] }
+  })
+  .populate<UserDocument>("author")
+  .sort({ publishedAt: -1 })
+  .limit(10)
+  .toJSON();
+
+// Type-safe access to populated data
+posts.forEach(post => {
+  console.log(`${post.title} by ${post.author.username}`);
+  // post.author is fully typed as UserDocument, not ObjectId!
+});
+```
+
+### Aggregation Pipeline
+
+```typescript
+// Get user statistics
+const userStats = await userModel.aggregate([
+  {
+    $lookup: {
+      from: 'posts',
+      localField: '_id',
+      foreignField: 'author',
+      as: 'posts'
+    }
+  },
+  {
+    $addFields: {
+      postCount: { $size: '$posts' },
+      publishedPostCount: {
+        $size: {
+          $filter: {
+            input: '$posts',
+            cond: { $eq: ['$$this.published', true] }
+          }
+        }
+      }
+    }
+  },
+  {
+    $project: {
+      username: 1,
+      email: 1,
+      postCount: 1,
+      publishedPostCount: 1,
+      joinedAt: '$createdAt'
+    }
+  }
+]);
+```
+
+## Testing Examples
+
+### Unit Testing with Models
+
+```typescript filename="tests/user.test.ts"
+import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import { userModel } from '../models/User';
+import { MongoClient } from '../lib/db';
+
+describe('User Model', () => {
+  beforeAll(async () => {
+    await MongoClient.connect();
+  });
+
+  afterAll(async () => {
+    await MongoClient.close();
+  });
+
+  test('should create user with valid data', async () => {
+    const userData = {
+      username: 'testuser',
+      email: 'test@example.com',
+      bio: 'Test user bio'
+    };
+
+    const user = await userModel.create(userData);
+    
+    expect(user.insertedId).toBeDefined();
+    expect(user.acknowledged).toBe(true);
+  });
+
+  test('should enforce unique constraints', async () => {
+    const userData = {
+      username: 'duplicate',
+      email: 'duplicate@example.com'
+    };
+
+    await userModel.create(userData);
+    
+    // Second creation should fail
+    await expect(userModel.create(userData)).rejects.toThrow();
+  });
+});
+```
+
+These examples demonstrate Monko's power in real-world applications. The type safety, performance, and intuitive API make it perfect for building robust MongoDB applications.
+
+## Next Steps
+
+- [Explore the full API reference](/api)
+- [Learn about advanced querying](/guide/queries)  
+- [Set up testing in your project](/guide/testing)

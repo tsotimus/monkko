@@ -1,0 +1,190 @@
+---
+title: Getting Started with Monko
+description: Learn how to install, configure, and start using Monko in your MongoDB projects
+---
+
+import { Steps } from 'nextra/components'
+import { Callout } from 'nextra/components'
+
+# Getting Started
+
+Get up and running with Monko in minutes.
+
+<Steps>
+
+### Installation
+
+Install Monko ORM and CLI:
+
+```bash
+npm install @monko/orm @monko/cli
+# or
+pnpm add @monko/orm @monko/cli  
+# or
+yarn add @monko/orm @monko/cli
+```
+
+### Initialize Your Project
+
+```bash
+npx monko init
+```
+
+This creates:
+- `monko.config.json` - Configuration file
+- `.gitignore` - Ignores generated files
+- Sample schema structure
+
+### Configure Database Connection
+
+Create your database connection:
+
+```typescript filename="lib/db.ts"
+import { createConnection } from '@monko/orm/connections';
+
+export const mongoClient = createConnection({
+  uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
+  options: {
+    // MongoDB connection options
+  }
+});
+```
+
+### Define Your First Schema
+
+Create a schema file ending in `.monko.ts`:
+
+```typescript filename="schemas/User.monko.ts"
+import { defineSchema, fields } from "@monko/orm/schemas";
+
+export const User = defineSchema({
+  name: "User",
+  db: "myapp",
+  collection: "users",
+  fields: {
+    name: fields.string({ required: true }),
+    email: fields.string({ 
+      required: true, 
+      unique: true 
+    }),
+    age: fields.number({ 
+      required: false,
+      min: 0,
+      max: 150 
+    }),
+    createdAt: fields.date({ 
+      default: () => new Date() 
+    })
+  }
+});
+```
+
+### Generate Types
+
+Run the code generation:
+
+```bash
+npx monko generate
+```
+
+This generates TypeScript types and interfaces from your schemas.
+
+<Callout>
+The CLI is built in Go for maximum performance - type generation typically takes under 100ms!
+</Callout>
+
+### Create and Use Models
+
+```typescript filename="models/User.ts" 
+import { createModel } from "@monko/orm/models";
+import { User } from "../schemas/User.monko";
+import { mongoClient } from "../lib/db";
+
+export const userModel = createModel(User, mongoClient);
+```
+
+Use your model:
+
+```typescript filename="app.ts"
+import { userModel } from "./models/User";
+
+// Create a user
+const newUser = await userModel.create({
+  name: "John Doe",
+  email: "john@example.com",
+  age: 25
+});
+
+// Find users
+const users = await userModel
+  .find({ age: { $gte: 18 } })
+  .toJSON();
+
+// Update a user  
+const updated = await userModel.updateOne(
+  { email: "john@example.com" },
+  { $set: { age: 26 } }
+);
+```
+
+</Steps>
+
+## Configuration
+
+### monko.config.json
+
+```json filename="monko.config.json"
+{
+  "schemaDir": "./schemas",
+  "outputDir": "./types/generated", 
+  "databases": {
+    "myapp": {
+      "uri": "mongodb://localhost:27017/myapp"
+    }
+  }
+}
+```
+
+## Environment Variables
+
+Set up your environment variables:
+
+```bash filename=".env.local"
+MONGODB_URI=mongodb://localhost:27017/myapp
+# or for MongoDB Atlas:
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/myapp
+```
+
+## Project Structure
+
+A typical Monko project looks like this:
+
+```
+myapp/
+├── schemas/           # Schema definitions (*.monko.ts)
+│   ├── User.monko.ts
+│   └── Post.monko.ts
+├── models/            # Generated models
+│   ├── User.ts
+│   └── Post.ts
+├── types/             # Generated TypeScript types
+│   └── generated/
+├── lib/
+│   └── db.ts         # Database connection
+├── monko.config.json # Monko configuration
+└── .env.local        # Environment variables
+```
+
+## Next Steps
+
+Now that you have Monko set up, explore these topics:
+
+- [Field Types](/guide/field-types) - Learn about all available field types
+- [Relationships](/guide/relationships) - Set up relations between documents  
+- [Validation](/guide/validation) - Add custom validation to your schemas
+- [CLI Commands](/guide/cli) - Master all CLI features
+- [Examples](/examples) - See real-world usage patterns
+
+<Callout type="info">
+Having trouble? Check out our [troubleshooting guide](/guide/troubleshooting) or [join our Discord community](https://discord.gg/monko).
+</Callout>

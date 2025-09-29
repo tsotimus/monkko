@@ -1,0 +1,61 @@
+---
+title: Monko Guide
+description: Comprehensive guide to using Monko ORM effectively
+---
+
+# Guide
+
+Welcome to the comprehensive Monko guide. This section covers everything you need to know to use Monko effectively in your projects.
+
+## Core Concepts
+
+### Schema-First Development
+Monko follows a schema-first approach where you define your data models using `.monko.ts` files, then generate TypeScript types and runtime validation automatically.
+
+### Type Safety
+Every operation in Monko is fully typed, from schema definition to query results. This eliminates runtime errors and provides excellent IDE support.
+
+### Performance
+The Go-powered CLI ensures fast type generation, while the runtime ORM is optimized for MongoDB operations.
+
+## Topics
+
+### [Field Types](/guide/field-types)
+Learn about all available field types including strings, numbers, dates, references, and arrays with their validation options.
+
+### [Relationships](/guide/relationships)  
+Set up relations between documents with type-safe populate functionality.
+
+### [Validation](/guide/validation)
+Add custom validation rules and leverage Zod integration for runtime safety.
+
+### [Queries](/guide/queries)
+Master the query API with MongoDB-style syntax and full TypeScript support.
+
+### [CLI Commands](/guide/cli)
+Complete reference for all CLI commands and configuration options.
+
+### [Migrations](/guide/migrations)
+Handle schema changes and data migrations safely in production.
+
+### [Multiple Databases](/guide/multiple-databases)
+Work with multiple MongoDB databases and collections in a single application.
+
+### [Testing](/guide/testing)
+Best practices for testing applications built with Monko.
+
+### [Troubleshooting](/guide/troubleshooting)
+Common issues and their solutions.
+
+## Best Practices
+
+- Keep schemas focused and avoid deeply nested objects
+- Use references instead of embedding for large related data
+- Leverage TypeScript strict mode for maximum safety
+- Set up proper indexing in MongoDB for referenced fields
+- Use the CLI's `--watch` mode during development
+
+## Migration Guides
+
+- [From Mongoose](/guide/migration-from-mongoose)
+- [From Prisma](/guide/migration-from-prisma)

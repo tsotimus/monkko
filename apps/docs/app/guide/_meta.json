@@ -1,0 +1,17 @@
+{
+  "index": {
+    "title": "Overview",
+    "display": "hidden"
+  },
+  "field-types": "Field Types",
+  "relationships": "Relationships", 
+  "validation": "Validation",
+  "queries": "Queries",
+  "cli": "CLI Commands",
+  "migrations": "Migrations",
+  "multiple-databases": "Multiple Databases",
+  "testing": "Testing",
+  "troubleshooting": "Troubleshooting",
+  "migration-from-mongoose": "From Mongoose",
+  "migration-from-prisma": "From Prisma"
+}

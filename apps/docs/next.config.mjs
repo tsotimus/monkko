@@ -1,6 +1,18 @@
 import nextra from 'nextra'
- 
+
 const withNextra = nextra({
-    search: { codeblocks: false }
+  latex: true,
+  search: {
+    codeblocks: false
+  }
 })
-export default withNextra()
+
+export default withNextra({
+    pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+    turbopack: {
+        resolveAlias: {
+        // Path to your `mdx-components` file with extension
+        'next-mdx-import-source-file': './mdx-components.tsx'
+        }
+    }
+})
