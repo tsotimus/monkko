@@ -244,36 +244,64 @@ func convertASTNodeToValue(node ast.Expression) (interface{}, error) {
 		}
 		return objMap, nil
 	case *ast.CallExpression:
-		// This is for handling field definitions like `fields.string({ required: true })`
-		callee, ok := n.Callee.(*ast.DotExpression)
-		if !ok {
-			return nil, fmt.Errorf("unsupported call expression callee type: %T", n.Callee)
-		}
+		// Handle different types of call expressions
+		switch callee := n.Callee.(type) {
+		case *ast.DotExpression:
+			// This is for handling field definitions like `fields.string({ required: true })`
+			// The type is the identifier, e.g., "string" from "fields.string"
+			fieldType := callee.Identifier.Name.String()
 
-		// The type is the identifier, e.g., "string" from "fields.string"
-		fieldType := callee.Identifier.Name.String()
-
-		var configMap map[string]interface{}
-		// The arguments to the call are the field configs
-		if len(n.ArgumentList) > 0 {
-			if argObj, ok := n.ArgumentList[0].(*ast.ObjectLiteral); ok {
-				val, err := convertASTNodeToValue(argObj)
-				if err != nil {
-					return nil, err
-				}
-				if val != nil {
-					configMap, _ = val.(map[string]interface{})
+			var configMap map[string]interface{}
+			// The arguments to the call are the field configs
+			if len(n.ArgumentList) > 0 {
+				if argObj, ok := n.ArgumentList[0].(*ast.ObjectLiteral); ok {
+					val, err := convertASTNodeToValue(argObj)
+					if err != nil {
+						return nil, err
+					}
+					if val != nil {
+						configMap, _ = val.(map[string]interface{})
+					}
 				}
 			}
-		}
-		if configMap == nil {
-			configMap = make(map[string]interface{})
-		}
+			if configMap == nil {
+				configMap = make(map[string]interface{})
+			}
 
-		// Inject the "type" property, which mapToSchema expects
-		configMap["type"] = fieldType
+			// Inject the "type" property, which mapToSchema expects
+			configMap["type"] = fieldType
 
-		return configMap, nil
+			return configMap, nil
+
+		case *ast.Identifier:
+			// This is for handling subdocument references like `Address({ optional: true })`
+			subdocType := callee.Name.String()
+
+			var configMap map[string]interface{}
+			// The arguments to the call are the subdocument configs
+			if len(n.ArgumentList) > 0 {
+				if argObj, ok := n.ArgumentList[0].(*ast.ObjectLiteral); ok {
+					val, err := convertASTNodeToValue(argObj)
+					if err != nil {
+						return nil, err
+					}
+					if val != nil {
+						configMap, _ = val.(map[string]interface{})
+					}
+				}
+			}
+			if configMap == nil {
+				configMap = make(map[string]interface{})
+			}
+
+			// Mark this as a subdocument type
+			configMap["type"] = subdocType
+
+			return configMap, nil
+
+		default:
+			return nil, fmt.Errorf("unsupported call expression callee type: %T", n.Callee)
+		}
 	default:
 		return nil, fmt.Errorf("unsupported AST node type for conversion: %T", n)
 	}

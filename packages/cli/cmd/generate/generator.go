@@ -25,21 +25,10 @@ func GenerateTypes(schemas []Schema, outputDir string, debug bool) error {
 		return err
 	}
 
-	// Check if any schema uses ObjectId type
-	needsUtils := false
-	for _, schema := range schemas {
-		if hasObjectIdField(schema) {
-			needsUtils = true
-			break
-		}
-	}
-
-	// Generate utils file if needed
-	if needsUtils {
-		err := generateUtilsFile(outputDir, debug)
-		if err != nil {
-			return fmt.Errorf("failed to generate utils file: %w", err)
-		}
+	// Always generate utils file since all schemas have _id field that uses ObjectIdSchema
+	err = generateUtilsFile(outputDir, debug)
+	if err != nil {
+		return fmt.Errorf("failed to generate utils file: %w", err)
 	}
 
 	// Generate schemas for each schema
@@ -101,16 +90,6 @@ func zodType(schemaType string, required bool) string {
 	}
 
 	return zodSchema
-}
-
-// hasObjectIdField checks if a schema has any fields with ObjectId type
-func hasObjectIdField(schema Schema) bool {
-	for _, field := range schema.Fields {
-		if field.Type == "objectId" {
-			return true
-		}
-	}
-	return false
 }
 
 // generateUtilsFile generates the shared utils file with ObjectIdSchema
