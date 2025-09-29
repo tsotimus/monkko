@@ -7,7 +7,7 @@
     "p:build": "turbo run build --filter=@monko/orm",
     "n:generate": "turbo run generate --filter=@monko/next",
     "build": "turbo run build",
-    "dev": "turbo run dev --filter=@monko/orm --filter=@monko/next",
+    "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
