@@ -1,5 +1,5 @@
 {
-  "outputDir": "types/monko",
+  "outputDir": "types/monkko",
   "excludes": [
     "**/node_modules/**",
     "**/dist/**",

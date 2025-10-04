@@ -1,4 +1,4 @@
-export type MonkoConfig = {
+export type MonkkoConfig = {
     /**
      * Directory to output generated types.
      * Defaults to "src/types" if not specified.
@@ -20,10 +20,10 @@ export type MonkoConfig = {
 }
 
 /**
- * Define the configuration for the Monko project.
+ * Define the configuration for the Monkko project.
  * @param config - The configuration object.
  * @returns The configuration object.
  */
-export const defineConfig = (config: MonkoConfig) => {
+export const defineConfig = (config: MonkkoConfig) => {
     return config;
 };

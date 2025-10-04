@@ -12,20 +12,20 @@ func LoadConfig(debug bool) (*Config, error) {
 		OutputDir: "generated", // Fallback if no config file
 	}
 
-	// Try to load monko.config.json
-	if _, err := os.Stat("monko.config.json"); err == nil {
+	// Try to load monkko.config.json
+	if _, err := os.Stat("monkko.config.json"); err == nil {
 		if debug {
-			fmt.Println("📝 Loading monko.config.json...")
+			fmt.Println("📝 Loading monkko.config.json...")
 		}
 
-		data, err := os.ReadFile("monko.config.json")
+		data, err := os.ReadFile("monkko.config.json")
 		if err != nil {
-			return nil, fmt.Errorf("failed to read monko.config.json: %w", err)
+			return nil, fmt.Errorf("failed to read monkko.config.json: %w", err)
 		}
 
 		var userConfig Config
 		if err := json.Unmarshal(data, &userConfig); err != nil {
-			return nil, fmt.Errorf("failed to parse monko.config.json: %w", err)
+			return nil, fmt.Errorf("failed to parse monkko.config.json: %w", err)
 		}
 
 		// Merge user config with defaults
@@ -39,7 +39,7 @@ func LoadConfig(debug bool) (*Config, error) {
 			config.Excludes = userConfig.Excludes
 		}
 	} else {
-		return nil, fmt.Errorf("no monko.config.json found. Run '@monkko/cli init' to create one")
+		return nil, fmt.Errorf("no monkko.config.json found. Run '@monkko/cli init' to create one")
 	}
 
 	return config, nil

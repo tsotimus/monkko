@@ -4,7 +4,7 @@
 
 ### Step 1: Extract Schema Definitions
 
-Using esbuild to parse the .monko.ts files and extract the schema definitions.
+Using esbuild to parse the .monkko.ts files and extract the schema definitions.
 
 ### Step 2: Generate Types
 

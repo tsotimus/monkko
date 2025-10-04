@@ -1,5 +1,5 @@
 import type { SchemaDefinition } from "../schemas/defineSchema";
-import type { MonkoClient } from "../connections/createConnection";
+import type { MonkkoClient } from "../connections/createConnection";
 import type { Filter, WithId, Collection, Document } from "mongodb";
 import { ObjectId } from "mongodb";
 import type {
@@ -33,7 +33,7 @@ abstract class QueryBuilderBase<Doc extends Document, TReturn>
   constructor(
     protected collection: Collection<Doc>,
     protected schema: SchemaDefinition,
-    protected monkoClient: MonkoClient,
+    protected monkkoClient: MonkkoClient,
     protected filter: Filter<Doc>,
     protected toJSONFunc: (doc: WithId<Doc>) => Prettify<JSONSerialized<WithId<Doc>>>,
   ) {}
@@ -106,7 +106,7 @@ export class QueryBuilderImpl<Doc extends Document>
           documentsToProcess as WithId<Doc>[],
           populateInfo,
           this.schema,
-          this.monkoClient,
+          this.monkkoClient,
         );
       }
       // TODO: Add aggregation strategy implementation
@@ -154,7 +154,7 @@ export class SingleQueryBuilderImpl<Doc extends Document>
           documentsToProcess as WithId<Doc>[],
           populateInfo,
           this.schema,
-          this.monkoClient,
+          this.monkkoClient,
         );
       }
       // TODO: Add aggregation strategy implementation
@@ -168,7 +168,7 @@ async function executePopulateWithMultipleQueries<Doc>(
   documents: WithId<Doc>[],
   populateInfo: PopulateInfo,
   schema: SchemaDefinition,
-  monkoClient: MonkoClient
+  monkkoClient: MonkkoClient
 ) {
   for (const fieldName of populateInfo.fields) {
     // Find the field definition in the schema
@@ -224,7 +224,7 @@ async function executePopulateWithMultipleQueries<Doc>(
     });
 
     // Get the referenced collection
-    const refCollection = monkoClient.client
+    const refCollection = monkkoClient.client
       .db(referencedSchema.db)
       .collection(referencedSchema.collection);
     

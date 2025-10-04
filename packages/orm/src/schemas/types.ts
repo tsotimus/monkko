@@ -21,26 +21,26 @@ export type BaseField = {
     transform?: (value: string) => unknown;
 }
 
-export interface ObjectFieldProps<T extends Record<string, MonkoField>> extends BaseField {
+export interface ObjectFieldProps<T extends Record<string, MonkkoField>> extends BaseField {
     schema: T;
 }
-export interface ObjectField<T extends Record<string, MonkoField>> extends ObjectFieldProps<T> {
+export interface ObjectField<T extends Record<string, MonkkoField>> extends ObjectFieldProps<T> {
     type: 'object';
 }
 
-export type MonkoField = StringField | NumberField | BooleanField | DateField | ObjectIdField | ObjectField<Record<string, MonkoField>>;
+export type MonkkoField = StringField | NumberField | BooleanField | DateField | ObjectIdField | ObjectField<Record<string, MonkkoField>>;
 
 /**
  * Infers the actual TypeScript type (
  *   string, number, boolean, Date, ObjectId
- * ) from a given MonkoField.
+ * ) from a given MonkkoField.
  */
-export type InferMonkoFieldType<F> =
+export type InferMonkkoFieldType<F> =
   F extends StringField ? string :
   F extends NumberField ? number :
   F extends BooleanField ? boolean :
   F extends DateField ? Date :
   F extends ObjectIdField ? ObjectId :
-  F extends ObjectField<infer S> ? { [K in keyof S]: InferMonkoFieldType<S[K]> } :
-  F extends [infer U] ? InferMonkoFieldType<U>[] :
+  F extends ObjectField<infer S> ? { [K in keyof S]: InferMonkkoFieldType<S[K]> } :
+  F extends [infer U] ? InferMonkkoFieldType<U>[] :
   never;

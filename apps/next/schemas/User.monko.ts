@@ -10,7 +10,7 @@ export const Address = defineSubDocument({
 
 export const User = defineSchema({
   name: "User",
-  db: "monko-test",
+  db: "monkko-test",
   collection: "users",
   fields: {
     name: fields.string({ required: true }),

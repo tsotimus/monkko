@@ -11,24 +11,24 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize a new Monko project",
-	Long:  `Creates a monko.config.json file with sensible defaults and updates .gitignore.`,
+	Short: "Initialize a new Monkko project",
+	Long:  `Creates a monkko.config.json file with sensible defaults and updates .gitignore.`,
 	RunE:  runInit,
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	fmt.Println("🚀 Initializing Monko project...")
+	fmt.Println("🚀 Initializing Monkko project...")
 
 	// Step 1: Check if config already exists
-	if _, err := os.Stat("monko.config.json"); err == nil {
-		fmt.Println("⚠️  monko.config.json already exists. Skipping config creation.")
+	if _, err := os.Stat("monkko.config.json"); err == nil {
+		fmt.Println("⚠️  monkko.config.json already exists. Skipping config creation.")
 	} else {
-		// Step 2: Create monko.config.json with defaults
+		// Step 2: Create monkko.config.json with defaults
 		err := createConfigFile()
 		if err != nil {
 			return fmt.Errorf("failed to create config file: %w", err)
 		}
-		fmt.Println("✅ Created monko.config.json")
+		fmt.Println("✅ Created monkko.config.json")
 	}
 
 	// Step 3: Update/create .gitignore
@@ -38,9 +38,9 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("✅ Updated .gitignore")
 
-	fmt.Println("\n🎉 Monko project initialized successfully!")
+	fmt.Println("\n🎉 Monkko project initialized successfully!")
 	fmt.Println("\nNext steps:")
-	fmt.Println("  1. Create your first schema file (*.monko.ts)")
+	fmt.Println("  1. Create your first schema file (*.monkko.ts)")
 	fmt.Println("  2. Run '@monkko/cli generate' to generate types")
 
 	return nil
@@ -48,7 +48,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 func createConfigFile() error {
 	configContent := `{
-  "outputDir": "types/monko",
+  "outputDir": "types/monkko",
   "excludes": [
     "**/node_modules/**",
     "**/dist/**",
@@ -60,11 +60,11 @@ func createConfigFile() error {
 }
 `
 
-	return os.WriteFile("monko.config.json", []byte(configContent), 0644)
+	return os.WriteFile("monkko.config.json", []byte(configContent), 0644)
 }
 
 func updateGitignore() error {
-	const outputDir = "types/monko"
+	const outputDir = "types/monkko"
 	const gitignoreFile = ".gitignore"
 
 	// Check if .gitignore exists
@@ -99,6 +99,6 @@ func updateGitignore() error {
 	}
 
 	// Add comment and outputDir
-	_, err = file.WriteString("# Monko generated types\n" + outputDir + "\n")
+	_, err = file.WriteString("# Monkko generated types\n" + outputDir + "\n")
 	return err
 }

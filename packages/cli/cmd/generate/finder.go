@@ -45,7 +45,7 @@ func FindSchemaFiles(config *Config, debug bool) ([]string, error) {
 				}
 			}
 
-			if strings.HasSuffix(path, ".monko.ts") {
+			if strings.HasSuffix(path, ".monkko.ts") {
 				files = append(files, path)
 			}
 

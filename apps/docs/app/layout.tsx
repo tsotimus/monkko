@@ -6,33 +6,33 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Monko',
-    template: '%s | Monko'
+    default: 'Monkko',
+    template: '%s | Monkko'
   },
   description: 'The modern MongoDB ORM.',
   keywords: ['MongoDB', 'ORM', 'TypeScript', 'Node.js', 'Database', 'Type Safety'],
-  authors: [{ name: 'Monko Team' }],
-  creator: 'Monko',
-  publisher: 'Monko',
+  authors: [{ name: 'Monkko Team' }],
+  creator: 'Monkko',
+  publisher: 'Monkko',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://monko.dev'),
+  metadataBase: new URL('https://monkko.dev'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://monko.dev',
-    title: 'Monko - The Modern MongoDB ORM',
+    url: 'https://monkko.dev',
+    title: 'Monkko - The Modern MongoDB ORM',
     description: 'The Modern MongoDB ORM',
-    siteName: 'Monko',
+    siteName: 'Monkko',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Monko - The Modern MongoDB ORM',
+    title: 'Monkko - The Modern MongoDB ORM',
     description: 'The Modern MongoDB ORM',
-    creator: '@monko_orm',
+    creator: '@monkko_orm',
   },
   robots: {
     index: true,
@@ -50,11 +50,11 @@ export const metadata: Metadata = {
 
 const navbar = (
   <Navbar
-    logo={<b>Monko</b>}
-    projectLink='https://github.com/tsotimus/monko'
+    logo={<b>Monkko</b>}
+    projectLink='https://github.com/tsotimus/monkko'
   />
 )
-const footer = <Footer>MIT {new Date().getFullYear()} © Monko.</Footer>
+const footer = <Footer>MIT {new Date().getFullYear()} © Monkko.</Footer>
  
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -71,7 +71,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           sidebar={{ autoCollapse: true }}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/tsotimus/monko/tree/main/apps/docs"
+          docsRepositoryBase="https://github.com/tsotimus/monkko/tree/main/apps/docs"
           footer={footer}
         >
           {children}

@@ -1,0 +1,9 @@
+import { z } from 'zod';
+import { isObjectId } from '@monko/orm/utils';
+
+// ObjectId schema for MongoDB ObjectId validation
+export const ObjectIdSchema = z.string().refine((val) => {
+  return isObjectId(val);
+}, {
+  message: "Invalid ObjectId"
+}); 

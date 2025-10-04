@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/monko/kit/cmd/generate"
+	"github.com/monkko/kit/cmd/generate"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "monko",
-	Short: "High-performance developer toolkit for Monko ORM",
-	Long: `Monko Kit is a fast CLI tool for generating TypeScript types from Monko ORM schemas.
+	Use:   "monkko",
+	Short: "High-performance developer toolkit for Monkko ORM",
+	Long: `Monkko Kit is a fast CLI tool for generating TypeScript types from Monkko ORM schemas.
 	
 Built with Go for maximum speed and reliability.`,
 }

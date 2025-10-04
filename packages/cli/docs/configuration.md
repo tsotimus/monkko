@@ -1,25 +1,25 @@
 # Configuration
 
-Monko CLI supports configuration via a `monko.config.json` file in your project root.
+Monkko CLI supports configuration via a `monkko.config.json` file in your project root.
 
 ## Getting Started
 
 The easiest way to get started is with the `init` command:
 
 ```bash
-# Creates monko.config.json with sensible defaults
+# Creates monkko.config.json with sensible defaults
 # Also updates/creates .gitignore to exclude generated types
 @monkko/cli init
 ```
 
-This creates a `monko.config.json` file with:
-- `outputDir: "types/monko"`
+This creates a `monkko.config.json` file with:
+- `outputDir: "types/monkko"`
 - Sensible `excludes` patterns for common build directories
 - Automatic `.gitignore` setup
 
 ## Monorepo Usage
 
-In a monorepo, run `@monkko/cli init` in each package/app that uses Monko:
+In a monorepo, run `@monkko/cli init` in each package/app that uses Monkko:
 
 ```bash
 # Initialize each package individually
@@ -36,7 +36,7 @@ turbo run generate
 
 ```json
 {
-  "outputDir": "types/monko",
+  "outputDir": "types/monkko",
   "excludes": [
     "**/node_modules/**",
     "**/dist/**",
@@ -50,11 +50,11 @@ turbo run generate
 
 ### `outputDir` (required)
 Directory where generated TypeScript types will be written.
-- **Default**: `"types/monko"` (via init command)
+- **Default**: `"types/monkko"` (via init command)
 - **Fallback**: `"generated"` (if no config file)
 
 ### `includes` (optional)
-Array of specific directories to search for `.monko.ts` files. If not specified, searches the entire current directory.
+Array of specific directories to search for `.monkko.ts` files. If not specified, searches the entire current directory.
 
 **Benefits:**
 - Faster generation (smaller search scope)
@@ -110,6 +110,6 @@ The `init` command automatically:
 
 Example `.gitignore` addition:
 ```
-# Monko generated types
-types/monko
+# Monkko generated types
+types/monkko
 ``` 

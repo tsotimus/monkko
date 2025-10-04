@@ -1,5 +1,5 @@
 {
-  "name": "monko",
+  "name": "monkko",
   "private": true,
   "scripts": {
     "c:build": "turbo run build --filter=@monkko/cli",

@@ -2,7 +2,7 @@ import { defineSchema, fields } from "@monkko/orm/schemas";
 
 export const Organisation = defineSchema({
   name: "Organisation",
-  db: "monko-test",
+  db: "monkko-test",
   collection: "organisations",
   fields: {
     name: fields.string({ required: true }),

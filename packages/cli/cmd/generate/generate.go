@@ -11,8 +11,8 @@ var debugFlag bool
 
 var Cmd = &cobra.Command{
 	Use:   "generate",
-	Short: "Generate Standard Schema validation functions from Monko schemas",
-	Long:  `Scans for *.monko.ts files and generates corresponding Standard Schema validation functions.`,
+	Short: "Generate Standard Schema validation functions from Monkko schemas",
+	Long:  `Scans for *.monkko.ts files and generates corresponding Standard Schema validation functions.`,
 	RunE:  runGenerate,
 }
 
@@ -42,7 +42,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(schemaFiles) == 0 {
-		fmt.Println("⚠️  No .monko.ts files found")
+		fmt.Println("⚠️  No .monkko.ts files found")
 		return nil
 	}
 

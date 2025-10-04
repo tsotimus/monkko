@@ -11,7 +11,7 @@ export function PageHeader() {
       
       <div className="space-y-4">
         <h1 className="text-5xl font-bold tracking-tight">
-          Monko ORM
+          Monkko ORM
         </h1>
         <h2 className="text-2xl font-semibold text-muted-foreground">
           Populate API Demo

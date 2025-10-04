@@ -1,17 +1,17 @@
 import { MongoClient, MongoClientOptions } from 'mongodb';
 
-interface MonkoClientOptions {
+interface MonkkoClientOptions {
   uri: string;
   mongoClientOptions?: MongoClientOptions;
 }
 
-export interface MonkoClient {
+export interface MonkkoClient {
   client: MongoClient;
   connect: () => Promise<MongoClient>;
   close: () => Promise<void>;
 }
 
-export const createMonkoClient = (options: MonkoClientOptions): MonkoClient => {
+export const createMonkkoClient = (options: MonkkoClientOptions): MonkkoClient => {
   const client = new MongoClient(options.uri, options.mongoClientOptions);
 
   return {

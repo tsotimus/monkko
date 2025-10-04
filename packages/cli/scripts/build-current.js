@@ -22,7 +22,7 @@ function buildForCurrentPlatform() {
   }
   
   const extension = platform === 'win32' ? '.exe' : '';
-  const binaryName = `monko-${goPlatform}${extension}`;
+  const binaryName = `monkko-${goPlatform}${extension}`;
   
   // Ensure bin directory exists
   execSync('mkdir -p bin', { stdio: 'inherit' });

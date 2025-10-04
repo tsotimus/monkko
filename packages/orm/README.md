@@ -15,4 +15,4 @@ TODO:
 - [ ] DB Connection
 - [ ] Handling multiple DB connections
 - [ ] Schema Definitions
-- [ ] Schema Definitions generating Zod Schemas via monko-generate command (Like Prisma)
+- [ ] Schema Definitions generating Zod Schemas via monkko-generate command (Like Prisma)

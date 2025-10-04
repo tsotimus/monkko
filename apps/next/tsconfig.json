@@ -12,7 +12,7 @@
     ]
   },
   "include": [
-    "monko.config.ts",
+    "monkko.config.ts",
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",

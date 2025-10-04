@@ -1,5 +1,5 @@
 import type { SchemaDefinition } from "../schemas/defineSchema";
-import type { MonkoClient } from "../connections/createConnection";
+import type { MonkkoClient } from "../connections/createConnection";
 import type { Filter, Document, UpdateFilter, WithId } from "mongodb";
 import type { Model, QueryBuilder, SingleQueryBuilder } from "./types";
 
@@ -15,8 +15,8 @@ import {
 export function createModel<
   Doc extends Document,
   S extends SchemaDefinition = SchemaDefinition,
->(schema: S, monkoClient: MonkoClient): Model<Doc> {
-  const coll = monkoClient.client.db(schema.db).collection<Doc>(schema.collection);
+>(schema: S, monkkoClient: MonkkoClient): Model<Doc> {
+  const coll = monkkoClient.client.db(schema.db).collection<Doc>(schema.collection);
 
   // Register the schema for populate functionality
   registerSchema(schema);
@@ -30,7 +30,7 @@ export function createModel<
       return new QueryBuilderImpl<Doc>(
         coll,
         schema,
-        monkoClient,
+        monkkoClient,
         filter,
         toJSON,
       );
@@ -40,7 +40,7 @@ export function createModel<
       return new SingleQueryBuilderImpl<Doc>(
         coll,
         schema,
-        monkoClient,
+        monkkoClient,
         filter,
         toJSON,
       );
@@ -71,7 +71,7 @@ export function createModel<
       }
 
       // Use untyped collection to avoid type assertion issues
-      const untypedColl = monkoClient.client.db(schema.db).collection(schema.collection);
+      const untypedColl = monkkoClient.client.db(schema.db).collection(schema.collection);
       return untypedColl.insertOne(transformedDoc);
     },
 

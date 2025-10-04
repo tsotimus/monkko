@@ -4,13 +4,13 @@ import { FileTree } from 'nextra/components'
 
 # Getting Started
 
-Get up and running with Monko in just a few minutes. This guide will walk you through installing both packages and setting up your first MongoDB schema.
+Get up and running with Monkko in just a few minutes. This guide will walk you through installing both packages and setting up your first MongoDB schema.
 
 <Steps>
 
 ### Installation
 
-Monko consists of two packages that work together:
+Monkko consists of two packages that work together:
 
 - **@monkko/orm** - The runtime ORM for your application
 - **@monkko/cli** - The code generation tool
@@ -49,22 +49,22 @@ yarn add -D @monkko/cli
 
 ### Initialize Your Project
 
-Start by initializing Monko in your project:
+Start by initializing Monkko in your project:
 
 <Tabs items={['pnpm', 'npm', 'yarn']}>
   <Tabs.Tab>
 ```bash
-pnpm monko init
+pnpm monkko init
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
-npx monko init
+npx monkko init
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
-yarn monko init
+yarn monkko init
 ```
   </Tabs.Tab>
 </Tabs>
@@ -73,13 +73,13 @@ This creates a project structure like this:
 
 <FileTree>
   <FileTree.Folder name="your-project" defaultOpen>
-    <FileTree.File name="monko.config.json" />
+    <FileTree.File name="monkko.config.json" />
     <FileTree.Folder name="schemas" defaultOpen>
-      <FileTree.File name="User.monko.ts" />
-      <FileTree.File name="Organisation.monko.ts" />
+      <FileTree.File name="User.monkko.ts" />
+      <FileTree.File name="Organisation.monkko.ts" />
     </FileTree.Folder>
     <FileTree.Folder name="types">
-      <FileTree.Folder name="monko">
+      <FileTree.Folder name="monkko">
         <FileTree.File name="User.types.ts" />
         <FileTree.File name="User.schema.ts" />
         <FileTree.File name="Organisation.types.ts" />
@@ -91,13 +91,13 @@ This creates a project structure like this:
 
 ### Configure Your MongoDB Connection
 
-Edit the generated `monko.config.json` to configure your MongoDB connection:
+Edit the generated `monkko.config.json` to configure your MongoDB connection:
 
 ```json
 {
   "mongoUri": "mongodb://localhost:27017",
   "schemasDir": "./schemas",
-  "outputDir": "./types/monko"
+  "outputDir": "./types/monkko"
 }
 ```
 
@@ -107,7 +107,7 @@ For production, use environment variables:
 {
   "mongoUri": "${MONGODB_URI}",
   "schemasDir": "./schemas", 
-  "outputDir": "./types/monko"
+  "outputDir": "./types/monkko"
 }
 ```
 
@@ -116,7 +116,7 @@ For production, use environment variables:
 Create a schema file in the `schemas/` directory:
 
 ```typescript
-// schemas/User.monko.ts
+// schemas/User.monkko.ts
 import { defineSchema, fields } from '@monkko/orm'
 
 export const User = defineSchema({
@@ -140,17 +140,17 @@ Run the CLI to generate TypeScript types and models:
 <Tabs items={['pnpm', 'npm', 'yarn']}>
   <Tabs.Tab>
 ```bash
-pnpm monko generate
+pnpm monkko generate
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
-npx monko generate
+npx monkko generate
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
-yarn monko generate
+yarn monkko generate
 ```
   </Tabs.Tab>
 </Tabs>
@@ -167,7 +167,7 @@ Import and use your generated models:
 
 ```typescript
 // Import the generated model
-import { userModel } from './types/monko/User.types'
+import { userModel } from './types/monkko/User.types'
 
 // Create a new user
 const newUser = await userModel.create({
@@ -194,7 +194,7 @@ const updated = await userModel.updateById(userId, {
 Each schema can specify its own database. This allows you to organize your data across multiple databases within the same MongoDB cluster:
 
 ```typescript
-// schemas/User.monko.ts
+// schemas/User.monkko.ts
 export const User = defineSchema({
   name: "User",
   db: "users", // Users database
@@ -206,7 +206,7 @@ export const User = defineSchema({
   }
 });
 
-// schemas/Organisation.monko.ts  
+// schemas/Organisation.monkko.ts  
 export const Organisation = defineSchema({
   name: "Organisation",
   db: "organisations", // Separate organisations database
@@ -217,7 +217,7 @@ export const Organisation = defineSchema({
   }
 });
 
-// schemas/Product.monko.ts
+// schemas/Product.monkko.ts
 export const Product = defineSchema({
   name: "Product", 
   db: "inventory", // Another separate database
@@ -235,7 +235,7 @@ export const Product = defineSchema({
 Define relationships between your schemas, even across different databases:
 
 ```typescript
-// schemas/User.monko.ts (updated with reference)
+// schemas/User.monkko.ts (updated with reference)
 export const User = defineSchema({
   name: "User", 
   db: "users",
@@ -270,7 +270,7 @@ For production, use environment variables in your config:
 {
   "mongoUri": "${MONGODB_URI}",
   "schemasDir": "./schemas",
-  "outputDir": "./types/monko"
+  "outputDir": "./types/monkko"
 }
 ```
 
@@ -282,7 +282,7 @@ export MONGODB_URI="mongodb://localhost:27017"
 
 ## Next Steps
 
-Now that you have Monko set up:
+Now that you have Monkko set up:
 
 1. **Explore Field Types** - Learn about all available field types and options
 2. **Advanced Queries** - Discover the full query builder API
@@ -294,8 +294,8 @@ Now that you have Monko set up:
 
 - Check out our [API Reference](/api)
 - Browse [Examples](/examples)
-- Join our [Community Discord](https://discord.gg/monko)
-- Report issues on [GitHub](https://github.com/monko-org/monko)
+- Join our [Community Discord](https://discord.gg/monkko)
+- Report issues on [GitHub](https://github.com/monkko-org/monkko)
 
 ---
 

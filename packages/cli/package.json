@@ -1,12 +1,12 @@
 {
   "name": "@monkko/cli",
   "version": "0.1.0",
-  "description": "High-performance developer CLI for Monko ORM",
+  "description": "High-performance developer CLI for Monkko ORM",
   "publishConfig": {
     "access": "public"
   },
   "bin": {
-    "monko": "./bin/monko.js"
+    "monkko": "./bin/monkko.js"
   },
   "files": [
     "bin/",
@@ -15,14 +15,14 @@
   ],
   "scripts": {
     "deps": "go mod download",
-    "build": "go build -o bin/monko ./cmd/",
+    "build": "go build -o bin/monkko ./cmd/",
     "build:all": "npm run build:linux && npm run build:macos && npm run build:windows",
-    "build:linux": "GOOS=linux GOARCH=amd64 go build -o bin/monko-linux ./cmd/",
-    "build:macos": "GOOS=darwin GOARCH=amd64 go build -o bin/monko-darwin ./cmd/",
-    "build:windows": "GOOS=windows GOARCH=amd64 go build -o bin/monko-windows.exe ./cmd/",
+    "build:linux": "GOOS=linux GOARCH=amd64 go build -o bin/monkko-linux ./cmd/",
+    "build:macos": "GOOS=darwin GOARCH=amd64 go build -o bin/monkko-darwin ./cmd/",
+    "build:windows": "GOOS=windows GOARCH=amd64 go build -o bin/monkko-windows.exe ./cmd/",
     "build:current": "node scripts/build-current.js",
     "test": "go test ./...",
-    "test:extractor": "node scripts/extract-schemas.js test/example.monko.ts",
+    "test:extractor": "node scripts/extract-schemas.js test/example.monkko.ts",
     "test:extractor:help": "node scripts/extract-schemas.js --help",
     "dev:extract": "node scripts/extract-schemas.js"
   },

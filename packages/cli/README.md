@@ -1,18 +1,18 @@
 # @monkko/cli
 
-High-performance developer toolkit for Monko ORM, written in Go for maximum speed.
+High-performance developer toolkit for Monkko ORM, written in Go for maximum speed.
 
 ## Quick Start
 
 ```bash
-# Initialize a new Monko project
-monko init
+# Initialize a new Monkko project
+monkko init
 
 # Generate types from schemas
-monko generate
+monkko generate
 
 # Validate schemas
-monko validate
+monkko validate
 ```
 
 ## Architecture
@@ -31,19 +31,19 @@ packages/
 
 ```bash
 # Initialize new project with config and .gitignore
-monko init
+monkko init
 
 # Generate types from schemas
-monko generate
+monkko generate
 
 # Validate schemas
-monko validate
+monkko validate
 ```
 
 ## Functionality
 
 - **Initialize projects** with sensible defaults and .gitignore setup
-- **Generate types** from schemas, looking at *.monko.ts files
+- **Generate types** from schemas, looking at *.monkko.ts files
 - **Validate schemas** for correctness
 - **Built with Monorepo's in mind**, so can be used in any project
 

@@ -48,7 +48,7 @@ export function extractSchemaNames(fileContent: string): string[] {
  * Validate a schema file for required patterns and structure
  */
 export function validateSchemaFile(fileContent: string, fileName: string): SchemaValidationResult {
-  const baseName = fileName.replace('.monko.ts', '');
+  const baseName = fileName.replace('.monkko.ts', '');
   const expectedSchemaName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
   
   // Check if defineSchema is imported

@@ -1,4 +1,4 @@
-module github.com/monko/kit
+module github.com/monkko/kit
 
 go 1.21
 

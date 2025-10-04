@@ -1,15 +1,15 @@
 # Examples
 
-See Monko in action with these practical examples that showcase its key features.
+See Monkko in action with these practical examples that showcase its key features.
 
 ## Basic Schema Definition
 
-Here's what working with Monko looks like:
+Here's what working with Monkko looks like:
 
 ### 1. Define Your Schema
 
 ```typescript
-// schemas/User.monko.ts
+// schemas/User.monkko.ts
 import { defineSchema, fields } from '@monkko/orm'
 
 export const User = defineSchema({
@@ -30,7 +30,7 @@ export const User = defineSchema({
 
 ```bash
 # Run the CLI to generate everything you need
-pnpm monko generate
+pnpm monkko generate
 ```
 
 This automatically creates:
@@ -63,7 +63,7 @@ const users = await userModel
 
 ## Multi-Database Architecture
 
-Unlike other ORMs that assume a single database, Monko is designed for **MongoDB clusters** where you have multiple databases. Each model connects to the correct database:
+Unlike other ORMs that assume a single database, Monkko is designed for **MongoDB clusters** where you have multiple databases. Each model connects to the correct database:
 
 ```typescript
 // Each model connects to the right database
@@ -84,7 +84,7 @@ export const AnalyticsEvent = defineSchema({
 
 ## Type Safety Examples
 
-Stop casting to `any` and losing type safety. Monko preserves types through your entire query chain:
+Stop casting to `any` and losing type safety. Monkko preserves types through your entire query chain:
 
 ```typescript
 // Without populate

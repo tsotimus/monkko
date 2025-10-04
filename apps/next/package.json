@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "generate": "monko generate"
+    "generate": "monkko generate"
   },
   "dependencies": {
     "@monkko/orm": "workspace:*",

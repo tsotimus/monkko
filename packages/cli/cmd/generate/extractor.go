@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// ExtractSchemas extracts schemas from .monko.ts files using pure Go implementation
+// ExtractSchemas extracts schemas from .monkko.ts files using pure Go implementation
 func ExtractSchemas(files []string, debug bool) ([]Schema, error) {
 	if len(files) == 0 {
 		return []Schema{}, nil

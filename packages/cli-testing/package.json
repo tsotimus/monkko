@@ -1,24 +1,24 @@
 {
   "name": "@monkko/cli-testing",
   "version": "0.1.0",
-  "description": "Testing utilities for validating Monko CLI code generation",
+  "description": "Testing utilities for validating Monkko CLI code generation",
   "type": "module",
   "scripts": {
     "test": "vitest",
     "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit",
-    "generate": "monko generate",
+    "generate": "monkko generate",
     "clean": "rm -rf src/types/db"
   },
   "keywords": [
-    "monko",
+    "monkko",
     "cli",
     "testing",
     "code-generation",
     "typescript",
     "validation"
   ],
-  "author": "Monko Team",
+  "author": "Monkko Team",
   "license": "MIT",
   "dependencies": {
     "@monkko/orm": "workspace:*",
@@ -45,7 +45,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/monko/kit.git",
+    "url": "git+https://github.com/monkko/kit.git",
     "directory": "packages/cli-testing"
   }
 }
