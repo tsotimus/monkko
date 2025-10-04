@@ -1,10 +1,15 @@
 {
-  "index": {
-    "title": "Home",
-    "type": "page"
-  },
-  "getting-started": "Getting Started",
-  "guide": "Guide", 
-  "examples": "Examples",
-  "api": "API Reference"
+    "index": {
+        "title": "Home",
+        "type": "page"
+    },
+    "getting-started": {
+        "title": "Getting Started",
+        "type": "page"
+    },
+    "examples": {
+        "title": "Examples",
+        "type": "page"
+    }
 }
+

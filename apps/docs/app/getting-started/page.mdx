@@ -1,190 +1,302 @@
----
-title: Getting Started with Monko
-description: Learn how to install, configure, and start using Monko in your MongoDB projects
----
-
+import { Tabs } from 'nextra/components'
 import { Steps } from 'nextra/components'
-import { Callout } from 'nextra/components'
+import { FileTree } from 'nextra/components'
 
 # Getting Started
 
-Get up and running with Monko in minutes.
+Get up and running with Monko in just a few minutes. This guide will walk you through installing both packages and setting up your first MongoDB schema.
 
 <Steps>
 
 ### Installation
 
-Install Monko ORM and CLI:
+Monko consists of two packages that work together:
 
+- **@monko/orm** - The runtime ORM for your application
+- **@monko/cli** - The code generation tool
+
+Install both packages:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tabs.Tab>
 ```bash
-npm install @monko/orm @monko/cli
-# or
-pnpm add @monko/orm @monko/cli  
-# or
-yarn add @monko/orm @monko/cli
+# Install the ORM package
+pnpm add @monko/orm
+
+# Install the CLI as a dev dependency
+pnpm add -D @monko/cli
 ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+# Install the ORM package
+npm install @monko/orm
+
+# Install the CLI as a dev dependency
+npm install -D @monko/cli
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+# Install the ORM package
+yarn add @monko/orm
+
+# Install the CLI as a dev dependency
+yarn add -D @monko/cli
+```
+  </Tabs.Tab>
+</Tabs>
 
 ### Initialize Your Project
 
+Start by initializing Monko in your project:
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tabs.Tab>
+```bash
+pnpm monko init
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```bash
 npx monko init
 ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+yarn monko init
+```
+  </Tabs.Tab>
+</Tabs>
 
-This creates:
-- `monko.config.json` - Configuration file
-- `.gitignore` - Ignores generated files
-- Sample schema structure
+This creates a project structure like this:
 
-### Configure Database Connection
+<FileTree>
+  <FileTree.Folder name="your-project" defaultOpen>
+    <FileTree.File name="monko.config.json" />
+    <FileTree.Folder name="schemas" defaultOpen>
+      <FileTree.File name="User.monko.ts" />
+      <FileTree.File name="Organisation.monko.ts" />
+    </FileTree.Folder>
+    <FileTree.Folder name="types">
+      <FileTree.Folder name="monko">
+        <FileTree.File name="User.types.ts" />
+        <FileTree.File name="User.schema.ts" />
+        <FileTree.File name="Organisation.types.ts" />
+        <FileTree.File name="Organisation.schema.ts" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
 
-Create your database connection:
+### Configure Your MongoDB Connection
 
-```typescript filename="lib/db.ts"
-import { createConnection } from '@monko/orm/connections';
+Edit the generated `monko.config.json` to configure your MongoDB connection:
 
-export const mongoClient = createConnection({
-  uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
-  options: {
-    // MongoDB connection options
-  }
-});
+```json
+{
+  "mongoUri": "mongodb://localhost:27017",
+  "schemasDir": "./schemas",
+  "outputDir": "./types/monko"
+}
 ```
 
-### Define Your First Schema
+For production, use environment variables:
 
-Create a schema file ending in `.monko.ts`:
+```json
+{
+  "mongoUri": "${MONGODB_URI}",
+  "schemasDir": "./schemas", 
+  "outputDir": "./types/monko"
+}
+```
 
-```typescript filename="schemas/User.monko.ts"
-import { defineSchema, fields } from "@monko/orm/schemas";
+### Create Your First Schema
+
+Create a schema file in the `schemas/` directory:
+
+```typescript
+// schemas/User.monko.ts
+import { defineSchema, fields } from '@monko/orm'
 
 export const User = defineSchema({
   name: "User",
-  db: "myapp",
+  db: "myapp", // Database name (uses mongoUri from config)
   collection: "users",
   fields: {
     name: fields.string({ required: true }),
-    email: fields.string({ 
-      required: true, 
-      unique: true 
-    }),
-    age: fields.number({ 
-      required: false,
-      min: 0,
-      max: 150 
-    }),
-    createdAt: fields.date({ 
-      default: () => new Date() 
-    })
+    email: fields.string({ required: true, unique: true }),
+    age: fields.number({ optional: true }),
+    createdAt: fields.date({ default: () => new Date() }),
+    updatedAt: fields.date({ default: () => new Date() })
   }
 });
 ```
 
-### Generate Types
+### Generate Types and Models
 
-Run the code generation:
+Run the CLI to generate TypeScript types and models:
 
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tabs.Tab>
+```bash
+pnpm monko generate
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```bash
 npx monko generate
 ```
-
-This generates TypeScript types and interfaces from your schemas.
-
-<Callout>
-The CLI is built in Go for maximum performance - type generation typically takes under 100ms!
-</Callout>
-
-### Create and Use Models
-
-```typescript filename="models/User.ts" 
-import { createModel } from "@monko/orm/models";
-import { User } from "../schemas/User.monko";
-import { mongoClient } from "../lib/db";
-
-export const userModel = createModel(User, mongoClient);
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+yarn monko generate
 ```
+  </Tabs.Tab>
+</Tabs>
 
-Use your model:
+This creates:
+- TypeScript interfaces for your schemas
+- Zod validation schemas
+- Fully typed model instances
+- Query builder types
 
-```typescript filename="app.ts"
-import { userModel } from "./models/User";
+### Use Your Models
 
-// Create a user
+Import and use your generated models:
+
+```typescript
+// Import the generated model
+import { userModel } from './types/monko/User.types'
+
+// Create a new user
 const newUser = await userModel.create({
   name: "John Doe",
   email: "john@example.com",
-  age: 25
+  age: 30
 });
 
-// Find users
+// Find users with type safety
 const users = await userModel
   .find({ age: { $gte: 18 } })
   .toJSON();
 
-// Update a user  
-const updated = await userModel.updateOne(
-  { email: "john@example.com" },
-  { $set: { age: 26 } }
-);
+// Update with validation
+const updated = await userModel.updateById(userId, {
+  name: "Jane Doe"
+});
 ```
 
 </Steps>
 
-## Configuration
+## Working with Multiple Databases
 
-### monko.config.json
+Each schema can specify its own database. This allows you to organize your data across multiple databases within the same MongoDB cluster:
 
-```json filename="monko.config.json"
-{
-  "schemaDir": "./schemas",
-  "outputDir": "./types/generated", 
-  "databases": {
-    "myapp": {
-      "uri": "mongodb://localhost:27017/myapp"
-    }
+```typescript
+// schemas/User.monko.ts
+export const User = defineSchema({
+  name: "User",
+  db: "users", // Users database
+  collection: "users",
+  fields: {
+    name: fields.string({ required: true }),
+    email: fields.string({ required: true, unique: true }),
+    organisationId: fields.objectId({ optional: true })
   }
-}
+});
+
+// schemas/Organisation.monko.ts  
+export const Organisation = defineSchema({
+  name: "Organisation",
+  db: "organisations", // Separate organisations database
+  collection: "organisations",
+  fields: {
+    name: fields.string({ required: true }),
+    website: fields.string({ optional: true })
+  }
+});
+
+// schemas/Product.monko.ts
+export const Product = defineSchema({
+  name: "Product", 
+  db: "inventory", // Another separate database
+  collection: "products",
+  fields: {
+    name: fields.string({ required: true }),
+    price: fields.number({ required: true }),
+    organisationId: fields.objectId({ required: true })
+  }
+});
+```
+
+## Working with References
+
+Define relationships between your schemas, even across different databases:
+
+```typescript
+// schemas/User.monko.ts (updated with reference)
+export const User = defineSchema({
+  name: "User", 
+  db: "users",
+  collection: "users",
+  fields: {
+    name: fields.string({ required: true }),
+    email: fields.string({ required: true, unique: true }),
+    organisation: fields.reference("Organisation", { optional: true }),
+    // ... other fields
+  }
+});
+```
+
+After regenerating, you can populate references:
+
+```typescript
+// Populate the organisation reference
+const usersWithOrgs = await userModel
+  .find({})
+  .populate("organisation")
+  .toJSON();
+
+// TypeScript knows organisation is now the full object!
+// usersWithOrgs[0].organisation.name ← Fully typed!
 ```
 
 ## Environment Variables
 
-Set up your environment variables:
+For production, use environment variables in your config:
 
-```bash filename=".env.local"
-MONGODB_URI=mongodb://localhost:27017/myapp
-# or for MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/myapp
+```json
+{
+  "mongoUri": "${MONGODB_URI}",
+  "schemasDir": "./schemas",
+  "outputDir": "./types/monko"
+}
 ```
 
-## Project Structure
+Set your environment variables:
 
-A typical Monko project looks like this:
-
-```
-myapp/
-├── schemas/           # Schema definitions (*.monko.ts)
-│   ├── User.monko.ts
-│   └── Post.monko.ts
-├── models/            # Generated models
-│   ├── User.ts
-│   └── Post.ts
-├── types/             # Generated TypeScript types
-│   └── generated/
-├── lib/
-│   └── db.ts         # Database connection
-├── monko.config.json # Monko configuration
-└── .env.local        # Environment variables
+```bash
+export MONGODB_URI="mongodb://localhost:27017"
 ```
 
 ## Next Steps
 
-Now that you have Monko set up, explore these topics:
+Now that you have Monko set up:
 
-- [Field Types](/guide/field-types) - Learn about all available field types
-- [Relationships](/guide/relationships) - Set up relations between documents  
-- [Validation](/guide/validation) - Add custom validation to your schemas
-- [CLI Commands](/guide/cli) - Master all CLI features
-- [Examples](/examples) - See real-world usage patterns
+1. **Explore Field Types** - Learn about all available field types and options
+2. **Advanced Queries** - Discover the full query builder API
+3. **Validation** - Customize Zod validation schemas
+4. **Multi-Database** - Set up multiple database connections
+5. **Performance** - Optimize queries and indexes
 
-<Callout type="info">
-Having trouble? Check out our [troubleshooting guide](/guide/troubleshooting) or [join our Discord community](https://discord.gg/monko).
-</Callout>
+## Need Help?
+
+- Check out our [API Reference](/api)
+- Browse [Examples](/examples)
+- Join our [Community Discord](https://discord.gg/monko)
+- Report issues on [GitHub](https://github.com/monko-org/monko)
+
+---
+
+Ready to build something amazing? Let's go! 🚀

@@ -1,54 +1,57 @@
 ---
 asIndexPage: true
-description: The TypeScript-first MongoDB ORM that doesn't compromise on performance. Built for modern applications with full type safety and blazing-fast code generation.
+description: TypeScript-first MongoDB ORM with automatic code generation, Zod validation, and built for multi-database clusters
+keywords: ['MongoDB', 'ORM', 'TypeScript', 'Node.js', 'Database', 'Type Safety', 'Performance', 'Code Generation', 'Zod', 'Validation']
 ---
 
-import { Callout } from 'nextra/components'
+# Monko
 
+**The Modern MongoDB ORM for TypeScript**
 
-<Hero />
-
-export function Hero() {
-  return (
-    <div className="text-center my-12">
-      <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-6">
-        Monko
-      </h1>
-      <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-        The TypeScript-first MongoDB ORM that doesn't compromise on performance. 
-        Built for modern applications with full type safety and blazing-fast code generation.
-      </p>
-    </div>
-  )
-}
-
-## Quick Example
-
-Here's what working with Monko looks like:
-
-```typescript
-// Define your schema with full TypeScript support
-export const User = defineSchema({
-  name: "User",
-  db: "myapp",
-  collection: "users",
-  fields: {
-    name: fields.string({ required: true }),
-    email: fields.string({ required: true, unique: true }),
-    organisation: fields.reference("Organisation", { optional: true })
-  }
-});
-
-// Get fully typed models with populate support
-const users = await userModel
-  .find({ name: { $regex: /john/i } })
-  .populate("organisation") // ← Automatically typed!
-  .toJSON();
-```
-
-<Callout type="info">
-The populate API automatically changes the return type based on whether populate is called. No more `any` types!
-</Callout>
+Our aim is simple: provide the **best modern developer experience possible** for MongoDB. Stop fighting your ORM. Get full type safety, automatic code generation, and built-in validation—without sacrificing performance.
 
 ## Why Monko?
 
+Traditional MongoDB ORMs force you to choose between developer experience and performance. **Monko gives you both.**
+
+### TypeScript First
+
+Built from the ground up with TypeScript. Every query, every populate, every field—fully typed.
+
+### Auto-Generated Code
+
+Define schemas once. Our CLI generates TypeScript types and Zod schemas automatically.
+
+### Built-in Validation
+
+Zod validation out of the box. ValiBot and more coming soon. Catch errors before they hit your database.
+
+### Multi-Database Ready
+
+Purpose-built for MongoDB clusters. Connect to multiple databases effortlessly.
+
+## What's Coming Next
+
+Monko is actively developed with exciting features on the roadmap:
+
+### Aggregation Pipeline Support
+
+Fully typed aggregation pipelines with auto-completion for every stage
+
+### Migration Tooling
+
+Safe database migrations with version control and rollback support
+
+### More Validation Libraries
+
+ValiBot, Yup, and custom validator support coming soon
+
+## Get Started
+
+Ready to see Monko in action? Check out our examples or dive into the full guide.
+
+[**View Examples →**](/examples) | [**Getting Started Guide →**](/getting-started)
+
+---
+
+Built with ❤️ for the TypeScript and MongoDB community

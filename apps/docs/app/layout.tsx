@@ -2,17 +2,56 @@ import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Head, } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Monko',
+    template: '%s | Monko'
+  },
+  description: 'The modern MongoDB ORM.',
+  keywords: ['MongoDB', 'ORM', 'TypeScript', 'Node.js', 'Database', 'Type Safety'],
+  authors: [{ name: 'Monko Team' }],
+  creator: 'Monko',
+  publisher: 'Monko',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://monko.dev'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://monko.dev',
+    title: 'Monko - The Modern MongoDB ORM',
+    description: 'The Modern MongoDB ORM',
+    siteName: 'Monko',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Monko - The Modern MongoDB ORM',
+    description: 'The Modern MongoDB ORM',
+    creator: '@monko_orm',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
  
-export const metadata = {
-  // Define your metadata here
-  // For more information on metadata API, see: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
-}
- 
-// const banner = <Banner storageKey="some-key">Nextra 4.0 is released 🎉</Banner>
+
 const navbar = (
   <Navbar
     logo={<b>Monko</b>}
-    // ... Your additional navbar options
+    projectLink='https://github.com/tsotimus/monko'
   />
 )
 const footer = <Footer>MIT {new Date().getFullYear()} © Monko.</Footer>
@@ -20,27 +59,20 @@ const footer = <Footer>MIT {new Date().getFullYear()} © Monko.</Footer>
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      // Not required, but good for SEO
       lang="en"
-      // Required to be set
       dir="ltr"
-      // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
       suppressHydrationWarning
     >
       <Head
-      // ... Your additional head options
       >
-        {/* Your additional tags should be passed as `children` of `<Head>` element */}
       </Head>
       <body>
         <Layout
-          // banner={banner}
-          // sidebar={sidebar}
+          sidebar={{ autoCollapse: true }}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
+          docsRepositoryBase="https://github.com/tsotimus/monko/tree/main/apps/docs"
           footer={footer}
-          // ... Your additional layout options
         >
           {children}
         </Layout>

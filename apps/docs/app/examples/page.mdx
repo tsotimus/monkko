@@ -1,0 +1,106 @@
+# Examples
+
+See Monko in action with these practical examples that showcase its key features.
+
+## Basic Schema Definition
+
+Here's what working with Monko looks like:
+
+### 1. Define Your Schema
+
+```typescript
+// schemas/User.monko.ts
+import { defineSchema, fields } from '@monko/orm'
+
+export const User = defineSchema({
+  name: "User",
+  db: "myapp",
+  collection: "users",
+  fields: {
+    name: fields.string({ required: true }),
+    email: fields.string({ required: true, unique: true }),
+    age: fields.number({ optional: true }),
+    organisation: fields.reference("Organisation", { optional: true }),
+    createdAt: fields.date({ default: () => new Date() })
+  }
+});
+```
+
+### 2. Generate Types & Validation
+
+```bash
+# Run the CLI to generate everything you need
+pnpm monko generate
+```
+
+This automatically creates:
+- ✅ TypeScript types for your models
+- ✅ Zod schemas for validation
+- ✅ Fully typed query builders
+
+### 3. Use Your Fully-Typed Models
+
+```typescript
+import { userModel } from './models/User'
+
+// ✨ Everything is typed!
+const users = await userModel
+  .find({ name: { $regex: /john/i } })
+  .populate("organisation") // ← Type changes automatically!
+  .toJSON();
+
+// TypeScript knows the exact shape:
+// users: Array<{
+//   name: string;
+//   email: string;
+//   age?: number;
+//   organisation: Organisation; // ← Populated!
+//   createdAt: Date;
+// }>
+```
+
+> **💡 Info:** The populate API automatically transforms return types. Call `.populate("organisation")` and TypeScript knows that field is no longer an ID!
+
+## Multi-Database Architecture
+
+Unlike other ORMs that assume a single database, Monko is designed for **MongoDB clusters** where you have multiple databases. Each model connects to the correct database:
+
+```typescript
+// Each model connects to the right database
+export const User = defineSchema({
+  name: "User",
+  db: "users", // ← Connects to the users database
+  collection: "users",
+  fields: { /* ... */ }
+});
+
+export const AnalyticsEvent = defineSchema({
+  name: "AnalyticsEvent",
+  db: "analytics", // ← Different database, same cluster
+  collection: "events",
+  fields: { /* ... */ }
+});
+```
+
+## Type Safety Examples
+
+Stop casting to `any` and losing type safety. Monko preserves types through your entire query chain:
+
+```typescript
+// Without populate
+const user = await userModel.findById(userId);
+// user.organisation → ObjectId
+
+// With populate
+const user = await userModel
+  .findById(userId)
+  .populate("organisation");
+// user.organisation → Organisation (full object!)
+
+// Multiple populates
+const post = await postModel
+  .findById(postId)
+  .populate("author")
+  .populate("comments.user");
+// TypeScript knows exactly what's populated!
+```
