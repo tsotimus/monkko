@@ -1,0 +1,152 @@
+name: "Release"
+on:
+  push:
+    branches: [main]
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  get_packages:
+    name: "Get Packages to Release"
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter_packages.outputs.changed_packages }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch the full history to ensure HEAD^1 is available
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          node-version: "18"  # Match your engines requirement
+
+      - name: Filter changed packages
+        id: filter_packages
+        run: |
+          chmod +x ./scripts/version-has-changed.sh
+          chmod +x ./scripts/packages-to-release.sh
+          packages=$(./scripts/packages-to-release.sh)
+          changed_packages=$(./scripts/version-has-changed.sh HEAD^1 HEAD "$packages")
+          echo "Changed Packages: $changed_packages"
+          echo "changed_packages=$changed_packages" >> $GITHUB_OUTPUT
+
+  build_and_test:
+    name: "Build and Test"
+    runs-on: ubuntu-latest
+    needs: get_packages
+    if: needs.get_packages.outputs.packages != '[]' && needs.get_packages.outputs.packages != ''
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.get_packages.outputs.packages) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          node-version: "18"
+
+      - name: Get package path
+        id: get_package_path
+        run: |
+          chmod +x ./scripts/get-package-path.sh
+          package_path=$(./scripts/get-package-path.sh ${{ matrix.package }})
+          echo "PACKAGE_PATH=$package_path" >> $GITHUB_OUTPUT
+
+      - name: Build packages
+        run: |
+          if [ "${{ matrix.package }}" = "@monko/orm" ]; then
+            pnpm p:build
+          elif [ "${{ matrix.package }}" = "@monko/cli" ]; then
+            pnpm c:build
+          fi
+
+      - name: Test packages
+        run: |
+          if [ "${{ matrix.package }}" = "@monko/cli" ]; then
+            pnpm c:test
+          fi
+
+      - name: Archive production artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-dist-${{ matrix.package }}
+          retention-days: 30
+          path: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}/dist
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [get_packages, build_and_test]
+    if: needs.get_packages.outputs.packages != '[]' && needs.get_packages.outputs.packages != ''
+    env:
+      NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+    strategy:        
+      matrix:
+        package: ${{ fromJson(needs.get_packages.outputs.packages) }}
+    name: "Publish ${{ matrix.package }}"
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          node-version: "18"
+
+      - name: Get package path
+        id: get_package_path
+        run: |
+          chmod +x ./scripts/get-package-path.sh
+          package_path=$(./scripts/get-package-path.sh ${{ matrix.package }})
+          echo "PACKAGE_PATH=$package_path" >> $GITHUB_OUTPUT
+
+      - name: Download production artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: package-dist-${{ matrix.package }}
+          path: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}/dist
+
+      - name: Prepare package for publishing
+        run: |
+          cd ${{ steps.get_package_path.outputs.PACKAGE_PATH }}
+          # Remove private flag for ORM package
+          if [ "${{ matrix.package }}" = "@monko/orm" ]; then
+            npm pkg set private=false
+          fi
+
+      - uses: JS-DevTools/npm-publish@v3
+        id: publish
+        with:
+          token: ${{ env.NPM_AUTH_TOKEN }}
+          package: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}
+          access: public
+
+      - name: Bump version and push tag
+        if: ${{ steps.publish.outputs.type }}
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: v${{ steps.publish.outputs.version }}
+          tag_prefix: ${{ matrix.package }}_
+
+      - name: Create a GitHub release
+        if: ${{ steps.publish.outputs.type }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          generateReleaseNotes: true
