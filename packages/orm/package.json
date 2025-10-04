@@ -1,6 +1,18 @@
 {
   "name": "@monkko/orm",
   "version": "0.1.0",
+  "description": "Modern MongoDB ORM for TypeScript with type-safe queries and schema validation",
+  "keywords": [
+    "mongodb",
+    "orm",
+    "typescript",
+    "database",
+    "schema",
+    "validation",
+    "type-safe",
+    "monkko"
+  ],
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },

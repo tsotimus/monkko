@@ -1,6 +1,20 @@
 {
   "name": "monkko",
   "private": true,
+  "description": "Modern MongoDB ORM for TypeScript - A complete toolkit for type-safe database operations",
+  "keywords": [
+    "mongodb",
+    "orm",
+    "typescript",
+    "database",
+    "schema",
+    "validation",
+    "type-safe",
+    "monorepo",
+    "cli",
+    "codegen"
+  ],
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsotimus/monkko.git"

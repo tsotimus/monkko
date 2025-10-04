@@ -1,7 +1,18 @@
 {
   "name": "@monkko/cli",
   "version": "0.1.0",
-  "description": "High-performance developer CLI for Monkko ORM",
+  "description": "High-performance developer CLI for Monkko ORM - Modern MongoDB ORM for TypeScript",
+  "keywords": [
+    "mongodb",
+    "orm",
+    "typescript",
+    "cli",
+    "database",
+    "schema",
+    "codegen",
+    "monkko"
+  ],
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
