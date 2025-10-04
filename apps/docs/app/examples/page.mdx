@@ -50,11 +50,11 @@ This automatically creates:
 ```typescript
 import { userModel } from './models/User'
 
-// ✨ Everything is typed!
+// ✨ Everything is typed with generics!
 const users = await userModel
   .find({ name: { $regex: /john/i } })
-  .populate("organisation") // ← Type changes automatically!
-  .toJSON();
+  .populate("organisation")
+  .toJSON(); // ← Handles serialization automatically
 
 // TypeScript knows the exact shape:
 // users: Array<{
@@ -66,7 +66,7 @@ const users = await userModel
 // }>
 ```
 
-> **💡 Info:** The populate API automatically transforms return types. Call `.populate("organisation")` and TypeScript knows that field is no longer an ID!
+> **💡 Info:** Monkko uses generics for type safety throughout your query chain. The `toJSON()` function automatically handles serialization, so you don't need to worry about manual type casting or serialization!
 
 ## Multi-Database Architecture
 
@@ -91,23 +91,27 @@ export const AnalyticsEvent = defineSchema({
 
 ## Type Safety Examples
 
-Stop casting to `any` and losing type safety. Monkko preserves types through your entire query chain:
+Stop casting to `any` and losing type safety. Monkko uses generics to preserve types through your entire query chain:
 
 ```typescript
-// Without populate
-const user = await userModel.findById(userId);
-// user.organisation → ObjectId
+// Without populate - use toJSON() for proper serialization
+const user = await userModel.findById(userId).toJSON();
+// user.organisation → ObjectId (string)
 
-// With populate
+// With populate - types automatically update
 const user = await userModel
   .findById(userId)
-  .populate("organisation");
+  .populate("organisation")
+  .toJSON();
 // user.organisation → Organisation (full object!)
 
-// Multiple populates
+// Multiple populates - all handled with generics
 const post = await postModel
   .findById(postId)
   .populate("author")
-  .populate("comments.user");
+  .populate("comments.user")
+  .toJSON();
 // TypeScript knows exactly what's populated!
 ```
+
+> **🔥 Pro Tip:** Always use `.toJSON()` at the end of your queries. It handles serialization automatically and ensures you get the correct TypeScript types without manual casting!
