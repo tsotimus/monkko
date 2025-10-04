@@ -1,5 +1,5 @@
 import { Organisation } from "@/schemas/Organisation.monko";
-import { createModel } from "@monko/orm/models";
+import { createModel } from "@monkko/orm/models";
 import { MongoClient } from "@/lib/MongoClient";
 import type { ObjectId } from "mongodb";
 

@@ -6,7 +6,7 @@ import organisationModel, {
   type OrganisationDocument,
 } from "@/models/Organisation";
 import { ObjectId } from "mongodb";
-import { JSONSerialized } from "@monko/orm";
+import { JSONSerialized } from "@monkko/orm";
 
 // Type for user with populated organisation for UI consumption
 type UserWithPopulatedOrg = JSONSerialized<UserDocumentPopulated>;

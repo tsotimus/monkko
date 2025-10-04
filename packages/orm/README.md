@@ -1,4 +1,4 @@
-# @monko/orm
+# @monkko/orm
 
 The goal is for this package to provide a new fresh ORM for MongoDB.
 

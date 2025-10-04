@@ -17,7 +17,7 @@
       "cache": false
     },
     "test": {},
-    "@monko/cli-testing#test": {
+    "@monkko/cli-testing#test": {
       "dependsOn": ["generate"]
     },
     "test:watch": {

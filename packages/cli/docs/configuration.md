@@ -9,7 +9,7 @@ The easiest way to get started is with the `init` command:
 ```bash
 # Creates monko.config.json with sensible defaults
 # Also updates/creates .gitignore to exclude generated types
-@monko/cli init
+@monkko/cli init
 ```
 
 This creates a `monko.config.json` file with:
@@ -19,15 +19,15 @@ This creates a `monko.config.json` file with:
 
 ## Monorepo Usage
 
-In a monorepo, run `@monko/cli init` in each package/app that uses Monko:
+In a monorepo, run `@monkko/cli init` in each package/app that uses Monko:
 
 ```bash
 # Initialize each package individually
-cd apps/api && npx @monko/cli init
-cd apps/web && npx @monko/cli init
+cd apps/api && npx @monkko/cli init
+cd apps/web && npx @monkko/cli init
 
 # Then generate types as needed
-pnpm -r exec @monko/cli generate
+pnpm -r exec @monkko/cli generate
 # or with turbo
 turbo run generate
 ```

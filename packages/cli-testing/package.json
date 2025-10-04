@@ -1,5 +1,5 @@
 {
-  "name": "@monko/cli-testing",
+  "name": "@monkko/cli-testing",
   "version": "0.1.0",
   "description": "Testing utilities for validating Monko CLI code generation",
   "type": "module",
@@ -21,7 +21,7 @@
   "author": "Monko Team",
   "license": "MIT",
   "dependencies": {
-    "@monko/orm": "workspace:*",
+    "@monkko/orm": "workspace:*",
     "@standard-schema/spec": "^1.0.0",
     "diff": "^5.1.0",
     "glob": "^10.3.0",
@@ -36,7 +36,7 @@
     "vitest": "^3.0.0"
   },
   "peerDependencies": {
-    "@monko/cli": "workspace:*"
+    "@monkko/cli": "workspace:*"
   },
   "files": [
     "dist/",

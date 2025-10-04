@@ -10,7 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': new URL('./src', import.meta.url).pathname,
-      '@monko/orm': new URL('../orm/src', import.meta.url).pathname,
+      '@monkko/orm': new URL('../orm/src', import.meta.url).pathname,
     },
   },
 }); 

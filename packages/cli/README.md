@@ -1,4 +1,4 @@
-# @monko/cli
+# @monkko/cli
 
 High-performance developer toolkit for Monko ORM, written in Go for maximum speed.
 

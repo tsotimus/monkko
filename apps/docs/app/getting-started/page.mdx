@@ -12,8 +12,8 @@ Get up and running with Monko in just a few minutes. This guide will walk you th
 
 Monko consists of two packages that work together:
 
-- **@monko/orm** - The runtime ORM for your application
-- **@monko/cli** - The code generation tool
+- **@monkko/orm** - The runtime ORM for your application
+- **@monkko/cli** - The code generation tool
 
 Install both packages:
 
@@ -21,28 +21,28 @@ Install both packages:
   <Tabs.Tab>
 ```bash
 # Install the ORM package
-pnpm add @monko/orm
+pnpm add @monkko/orm
 
 # Install the CLI as a dev dependency
-pnpm add -D @monko/cli
+pnpm add -D @monkko/cli
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
 # Install the ORM package
-npm install @monko/orm
+npm install @monkko/orm
 
 # Install the CLI as a dev dependency
-npm install -D @monko/cli
+npm install -D @monkko/cli
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
 # Install the ORM package
-yarn add @monko/orm
+yarn add @monkko/orm
 
 # Install the CLI as a dev dependency
-yarn add -D @monko/cli
+yarn add -D @monkko/cli
 ```
   </Tabs.Tab>
 </Tabs>
@@ -117,7 +117,7 @@ Create a schema file in the `schemas/` directory:
 
 ```typescript
 // schemas/User.monko.ts
-import { defineSchema, fields } from '@monko/orm'
+import { defineSchema, fields } from '@monkko/orm'
 
 export const User = defineSchema({
   name: "User",

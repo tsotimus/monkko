@@ -1,6 +1,6 @@
 import { SchemaFile } from './loadSchemas';
 
-import {SchemaDefinition} from '@monko/orm'
+import {SchemaDefinition} from '@monkko/orm'
 
 export const getSchemaOptions = (loadedSchemas: SchemaFile[]) => {
     const allOptions: Record<string, SchemaDefinition['options']> = {};

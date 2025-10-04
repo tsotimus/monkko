@@ -62,15 +62,15 @@ jobs:
 
       - name: Build packages
         run: |
-          if [ "${{ matrix.package }}" = "@monko/orm" ]; then
+          if [ "${{ matrix.package }}" = "@monkko/orm" ]; then
             pnpm p:build
-          elif [ "${{ matrix.package }}" = "@monko/cli" ]; then
+          elif [ "${{ matrix.package }}" = "@monkko/cli" ]; then
             pnpm c:build
           fi
 
       - name: Test packages
         run: |
-          if [ "${{ matrix.package }}" = "@monko/cli" ]; then
+          if [ "${{ matrix.package }}" = "@monkko/cli" ]; then
             pnpm c:test
           fi
 
@@ -122,7 +122,7 @@ jobs:
         run: |
           cd ${{ steps.get_package_path.outputs.PACKAGE_PATH }}
           # Remove private flag for ORM package
-          if [ "${{ matrix.package }}" = "@monko/orm" ]; then
+          if [ "${{ matrix.package }}" = "@monkko/orm" ]; then
             npm pkg set private=false
           fi
 

@@ -72,7 +72,7 @@ importers:
 
   apps/next:
     dependencies:
-      '@monko/orm':
+      '@monkko/orm':
         specifier: workspace:*
         version: link:../../packages/orm
       '@radix-ui/react-avatar':
@@ -115,7 +115,7 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
     devDependencies:
-      '@monko/cli':
+      '@monkko/cli':
         specifier: workspace:*
         version: link:../../packages/cli
       '@repo/eslint-config':
@@ -163,10 +163,10 @@ importers:
 
   packages/cli-testing:
     dependencies:
-      '@monko/cli':
+      '@monkko/cli':
         specifier: workspace:*
         version: link:../cli
-      '@monko/orm':
+      '@monkko/orm':
         specifier: workspace:*
         version: link:../orm
       '@standard-schema/spec':

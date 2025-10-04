@@ -1,4 +1,4 @@
-import { defineSchema, fields } from "@monko/orm/schemas";
+import { defineSchema, fields } from "@monkko/orm/schemas";
 
 export const Organisation = defineSchema({
   name: "Organisation",

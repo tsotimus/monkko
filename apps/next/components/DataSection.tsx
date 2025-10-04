@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Database, Link } from "lucide-react";
 import { UserCard } from "./UserCard";
 import type { UserDocument, UserDocumentPopulated } from "@/models/User";
-import { JSONSerialized } from "@monko/orm";
+import { JSONSerialized } from "@monkko/orm";
 // import type { OrganisationDocument } from "@/models/Organisation";
 
 type DataSectionProps =

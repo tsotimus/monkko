@@ -1,4 +1,4 @@
-import { createMonkoClient } from '@monko/orm/connections';
+import { createMonkoClient } from '@monkko/orm/connections';
 
 const MONGO_URI = process.env.MONGO_URI;
 

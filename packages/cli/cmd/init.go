@@ -41,7 +41,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n🎉 Monko project initialized successfully!")
 	fmt.Println("\nNext steps:")
 	fmt.Println("  1. Create your first schema file (*.monko.ts)")
-	fmt.Println("  2. Run '@monko/cli generate' to generate types")
+	fmt.Println("  2. Run '@monkko/cli generate' to generate types")
 
 	return nil
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@monko/next",
+  "name": "@monkko/next",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -12,7 +12,7 @@
     "generate": "monko generate"
   },
   "dependencies": {
-    "@monko/orm": "workspace:*",
+    "@monkko/orm": "workspace:*",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
@@ -28,7 +28,7 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
-    "@monko/cli": "workspace:*",
+    "@monkko/cli": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",

@@ -39,7 +39,7 @@ func LoadConfig(debug bool) (*Config, error) {
 			config.Excludes = userConfig.Excludes
 		}
 	} else {
-		return nil, fmt.Errorf("no monko.config.json found. Run '@monko/cli init' to create one")
+		return nil, fmt.Errorf("no monko.config.json found. Run '@monkko/cli init' to create one")
 	}
 
 	return config, nil

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isObjectId } from '@monko/orm/utils';
+import { isObjectId } from '@monkko/orm/utils';
 
 // ObjectId schema for MongoDB ObjectId validation
 export const ObjectIdSchema = z.string().refine((val) => {

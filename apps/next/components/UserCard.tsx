@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Building2 } from "lucide-react";
 import type { UserDocument, UserDocumentPopulated } from "@/models/User";
 import type { OrganisationDocument } from "@/models/Organisation";
-import { JSONSerialized } from "@monko/orm";
+import { JSONSerialized } from "@monkko/orm";
 
 // Type for user with populated organisation
 type UserWithPopulatedOrg = JSONSerialized<UserDocumentPopulated>;

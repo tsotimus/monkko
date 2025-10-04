@@ -52,10 +52,10 @@ export function validateSchemaFile(fileContent: string, fileName: string): Schem
   const expectedSchemaName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
   
   // Check if defineSchema is imported
-  const hasDefineSchemaImport = /import\s*\{[^}]*defineSchema[^}]*\}\s*from\s*["']@monko\/orm["']/.test(fileContent);
+  const hasDefineSchemaImport = /import\s*\{[^}]*defineSchema[^}]*\}\s*from\s*["']@monkko\/orm["']/.test(fileContent);
   
   // Check if fields is imported
-  const hasFieldsImport = /import\s*\{[^}]*fields[^}]*\}\s*from\s*["']@monko\/orm["']/.test(fileContent);
+  const hasFieldsImport = /import\s*\{[^}]*fields[^}]*\}\s*from\s*["']@monkko\/orm["']/.test(fileContent);
   
   // Extract schema names
   const schemaNames = extractSchemaNames(fileContent);

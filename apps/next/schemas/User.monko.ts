@@ -1,4 +1,4 @@
-import { defineSchema, defineSubDocument, fields } from "@monko/orm/schemas";
+import { defineSchema, defineSubDocument, fields } from "@monkko/orm/schemas";
 
 
 export const Address = defineSubDocument({

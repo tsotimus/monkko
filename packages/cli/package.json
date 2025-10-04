@@ -1,5 +1,5 @@
 {
-  "name": "@monko/cli",
+  "name": "@monkko/cli",
   "version": "0.1.0",
   "description": "High-performance developer CLI for Monko ORM",
   "publishConfig": {
