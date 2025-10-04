@@ -6,7 +6,7 @@
     "access": "public"
   },
   "bin": {
-    "monko": "./bin/monko"
+    "monko": "./bin/monko.js"
   },
   "files": [
     "bin/",
@@ -24,8 +24,7 @@
     "test": "go test ./...",
     "test:extractor": "node scripts/extract-schemas.js test/example.monko.ts",
     "test:extractor:help": "node scripts/extract-schemas.js --help",
-    "dev:extract": "node scripts/extract-schemas.js",
-    "postinstall": "npm run deps && npm run build:current && node scripts/postinstall.js"
+    "dev:extract": "node scripts/extract-schemas.js"
   },
   "dependencies": {
     "typescript": "^5.0.0"
