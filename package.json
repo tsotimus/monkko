@@ -1,6 +1,11 @@
 {
   "name": "monkko",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsotimus/monkko.git"
+  },
+  "homepage": "https://monkko.com",
   "scripts": {
     "c:build": "turbo run build --filter=@monkko/cli",
     "c:test": "turbo run test --filter=@monkko/cli-testing",

@@ -5,6 +5,12 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsotimus/monkko.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://monkko.com",
   "bin": {
     "monkko": "./bin/monkko.js"
   },
