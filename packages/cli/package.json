@@ -1,6 +1,6 @@
 {
   "name": "@monkko/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "High-performance developer CLI for Monkko ORM - Modern MongoDB ORM for TypeScript",
   "keywords": [
     "mongodb",
