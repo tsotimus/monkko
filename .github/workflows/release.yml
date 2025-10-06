@@ -60,6 +60,13 @@ jobs:
           package_path=$(./scripts/get-package-path.sh ${{ matrix.package }})
           echo "PACKAGE_PATH=$package_path" >> $GITHUB_OUTPUT
 
+      - name: Sanitize package name
+        id: sanitize_package_name
+        run: |
+          chmod +x ./scripts/sanitize-package-name.sh
+          sanitized_name=$(./scripts/sanitize-package-name.sh "${{ matrix.package }}")
+          echo "SANITIZED_NAME=$sanitized_name" >> $GITHUB_OUTPUT
+
       - name: Build packages
         run: |
           if [ "${{ matrix.package }}" = "@monkko/orm" ]; then
@@ -78,7 +85,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: package-dist-${{ matrix.package }}
+          name: package-dist-${{ steps.sanitize_package_name.outputs.SANITIZED_NAME }}
           retention-days: 30
           path: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}/dist
 
@@ -112,10 +119,17 @@ jobs:
           package_path=$(./scripts/get-package-path.sh ${{ matrix.package }})
           echo "PACKAGE_PATH=$package_path" >> $GITHUB_OUTPUT
 
+      - name: Sanitize package name
+        id: sanitize_package_name
+        run: |
+          chmod +x ./scripts/sanitize-package-name.sh
+          sanitized_name=$(./scripts/sanitize-package-name.sh "${{ matrix.package }}")
+          echo "SANITIZED_NAME=$sanitized_name" >> $GITHUB_OUTPUT
+
       - name: Download production artifacts
         uses: actions/download-artifact@v4
         with:
-          name: package-dist-${{ matrix.package }}
+          name: package-dist-${{ steps.sanitize_package_name.outputs.SANITIZED_NAME }}
           path: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}/dist
 
       - name: Prepare package for publishing
