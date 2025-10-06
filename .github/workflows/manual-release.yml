@@ -1,0 +1,159 @@
+name: "Manual Release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to release'
+        required: true
+        type: choice
+        options:
+          - '@monkko/orm'
+          - '@monkko/cli'
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - 'patch'
+          - 'minor'
+          - 'major'
+        default: 'patch'
+      dry_run:
+        description: 'Dry run mode (no actual publish/commit)'
+        required: true
+        type: boolean
+        default: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  release:
+    name: "Release ${{ inputs.package }}"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          node-version: "18"
+
+      - name: Get package path
+        id: get_package_path
+        run: |
+          chmod +x ./scripts/get-package-path.sh
+          package_path=$(./scripts/get-package-path.sh "${{ inputs.package }}")
+          echo "PACKAGE_PATH=$package_path" >> $GITHUB_OUTPUT
+
+      - name: Sanitize package name
+        id: sanitize_package_name
+        run: |
+          chmod +x ./scripts/sanitize-package-name.sh
+          sanitized_name=$(./scripts/sanitize-package-name.sh "${{ inputs.package }}")
+          echo "SANITIZED_NAME=$sanitized_name" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          cd ${{ steps.get_package_path.outputs.PACKAGE_PATH }}
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "🔍 DRY RUN: Would bump version with: npm version ${{ inputs.version_bump }}"
+            new_version=$(npm version ${{ inputs.version_bump }} --no-git-tag-version --dry-run | sed 's/^v//')
+            git checkout -- package.json
+          else
+            npm version ${{ inputs.version_bump }} --no-git-tag-version
+            new_version=$(node -p "require('./package.json').version")
+          fi
+          echo "NEW_VERSION=$new_version" >> $GITHUB_OUTPUT
+          echo "New version: $new_version"
+
+      - name: Commit version change
+        if: inputs.dry_run == false
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ${{ steps.get_package_path.outputs.PACKAGE_PATH }}/package.json
+          git commit -m "chore: bump ${{ inputs.package }} to v${{ steps.bump_version.outputs.NEW_VERSION }}"
+          git push
+
+      - name: Build packages
+        run: |
+          if [ "${{ inputs.package }}" = "@monkko/orm" ]; then
+            pnpm p:build
+          elif [ "${{ inputs.package }}" = "@monkko/cli" ]; then
+            pnpm c:build
+          fi
+
+      - name: Test packages
+        run: |
+          if [ "${{ inputs.package }}" = "@monkko/cli" ]; then
+            pnpm c:test
+          fi
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-dist-${{ steps.sanitize_package_name.outputs.SANITIZED_NAME }}
+          retention-days: 30
+          path: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}/dist
+
+      - name: Prepare package for publishing
+        if: inputs.dry_run == false
+        run: |
+          cd ${{ steps.get_package_path.outputs.PACKAGE_PATH }}
+          if [ "${{ inputs.package }}" = "@monkko/orm" ]; then
+            npm pkg set private=false
+          fi
+
+      - name: Publish to npm
+        if: inputs.dry_run == false
+        uses: JS-DevTools/npm-publish@v3
+        id: publish
+        with:
+          token: ${{ secrets.NPM_AUTH_TOKEN }}
+          package: ${{ steps.get_package_path.outputs.PACKAGE_PATH }}
+          access: public
+
+      - name: Create git tag
+        if: inputs.dry_run == false
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: v${{ steps.bump_version.outputs.NEW_VERSION }}
+          tag_prefix: ${{ inputs.package }}_
+
+      - name: Create GitHub release
+        if: inputs.dry_run == false
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: |
+            Release ${{ inputs.package }} v${{ steps.bump_version.outputs.NEW_VERSION }}
+          generateReleaseNotes: true
+
+      - name: Summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package:** ${{ inputs.package }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ steps.bump_version.outputs.NEW_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bump Type:** ${{ inputs.version_bump }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **This was a dry run - no publish or git changes were made**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Release completed successfully**" >> $GITHUB_STEP_SUMMARY
+          fi
+

@@ -1,6 +1,6 @@
 {
   "name": "@monkko/cli",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "description": "High-performance developer CLI for Monkko ORM - Modern MongoDB ORM for TypeScript",
   "keywords": [
     "mongodb",
@@ -32,8 +32,8 @@
   ],
   "scripts": {
     "deps": "go mod download",
-    "build": "go build -o bin/monkko ./cmd/",
-    "build:all": "npm run build:linux && npm run build:macos && npm run build:windows",
+    "build": "go build -o bin/monkko ./cmd/ && cp scripts/monkko.js bin/monkko.js",
+    "build:all": "npm run build:linux && npm run build:macos && npm run build:windows && cp scripts/monkko.js bin/monkko.js",
     "build:linux": "GOOS=linux GOARCH=amd64 go build -o bin/monkko-linux ./cmd/",
     "build:macos": "GOOS=darwin GOARCH=amd64 go build -o bin/monkko-darwin ./cmd/",
     "build:windows": "GOOS=windows GOARCH=amd64 go build -o bin/monkko-windows.exe ./cmd/",

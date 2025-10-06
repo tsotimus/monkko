@@ -1,6 +1,6 @@
 {
   "name": "@monkko/orm",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "description": "Modern MongoDB ORM for TypeScript with type-safe queries and schema validation",
   "keywords": [
     "mongodb",

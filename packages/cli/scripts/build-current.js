@@ -40,6 +40,7 @@ function buildForCurrentPlatform() {
   });
   
   console.log(`✅ Built bin/${binaryName}`);
+  
 }
 
 // Only run if this script is executed directly
