@@ -10,8 +10,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "monkko",
-	Short: "High-performance developer toolkit for Monkko ORM",
-	Long: `Monkko Kit is a fast CLI tool for generating TypeScript types from Monkko ORM schemas.
+	Short: "High-performance developer toolkit for Monkko ODM",
+	Long: `Monkko Kit is a fast CLI tool for generating TypeScript types from Monkko ODM schemas.
 	
 Built with Go for maximum speed and reliability.`,
 }

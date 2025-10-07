@@ -2,7 +2,7 @@
 
 ## Project structure
 
-- `packages/orm` - contains the Monkko ORM
+- `packages/orm` - contains the Monkko ODM
 - `packages/cli` - contains the Monkko CLI
 - `apps/` - contains the applications for testing purposes
 

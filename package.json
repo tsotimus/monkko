@@ -1,10 +1,10 @@
 {
   "name": "monkko",
   "private": true,
-  "description": "Modern MongoDB ORM for TypeScript - A complete toolkit for type-safe database operations",
+  "description": "Modern MongoDB ODM for TypeScript - A complete toolkit for type-safe database operations",
   "keywords": [
     "mongodb",
-    "orm",
+    "odm",
     "typescript",
     "database",
     "schema",

@@ -1,6 +1,6 @@
 # @monkko/cli
 
-High-performance developer toolkit for Monkko ORM, written in Go for maximum speed.
+High-performance developer toolkit for Monkko ODM, written in Go for maximum speed.
 
 Read the docs [here](https://monkko.com) for more information.
 

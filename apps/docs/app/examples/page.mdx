@@ -27,7 +27,7 @@ export const User = defineSchema({
     name: fields.string({ required: true }),
     email: fields.string({ required: true, unique: true }),
     age: fields.number({ optional: true }),
-    organisation: fields.reference("Organisation", { optional: true }),
+    organisation: fields.objectId({ required: false, ref: "Organisation" })
     createdAt: fields.date({ default: () => new Date() })
   }
 });

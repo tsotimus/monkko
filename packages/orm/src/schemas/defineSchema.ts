@@ -27,7 +27,7 @@ export interface SchemaDefinition {
 /**
  * Defines a Monkko schema.
  * This function will take a schema definition, validate it,
- * and return a processed schema object that can be used by the ORM.
+ * and return a processed schema object that can be used by the ODM.
  *
  * @param definition The schema definition object.
  * @returns A processed Monkko schema.

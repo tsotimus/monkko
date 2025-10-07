@@ -1,6 +1,6 @@
 # @monkko/orm
 
-A new modern MongoDB ORM for TypeScript.
+A new modern MongoDB ODM for TypeScript.
 
 Read the docs [here](https://monkko.com) for more information.
 

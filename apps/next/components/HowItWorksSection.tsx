@@ -57,7 +57,7 @@ export function HowItWorksSection() {
               </div>
               <div className="text-left">
                 <h4 className="font-semibold">Ready to get started?</h4>
-                <p className="text-sm text-muted-foreground">Experience the power of Monkko ORM in your next project</p>
+                <p className="text-sm text-muted-foreground">Experience the power of Monkko ODM in your next project</p>
               </div>
             </div>
           </Card>
