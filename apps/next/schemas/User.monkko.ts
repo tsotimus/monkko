@@ -16,5 +16,6 @@ export const User = defineSchema({
     name: fields.string({ required: true }),
     email: fields.string({ required: true, unique: true }),
     address: Address({optional: true}),
+    organisationId: fields.objectId({ required: false, ref: "Organisation" })
   }
 });
